@@ -192,6 +192,52 @@ def load_data(filename: str = "addressbook.pkl") -> AddressBook:
         return AddressBook()
 
 
+# ── Довідка (help) ────────────────────────────────────────────────────────────
+
+HELP: dict[str, tuple[str, str]] = {
+    "hello": ("hello", "Привітання."),
+    "add": ("add <ім'я> <телефон>", "Додати контакт або телефон до існуючого (телефон — 10 цифр)."),
+    "change": ("change <ім'я> <старий_телефон> <новий_телефон>", "Змінити номер телефону контакту."),
+    "phone": ("phone <ім'я>", "Показати телефони контакту."),
+    "all": ("all", "Показати всі контакти."),
+    "add-birthday": ("add-birthday <ім'я> <DD.MM.YYYY>", "Додати день народження контакту."),
+    "show-birthday": ("show-birthday <ім'я>", "Показати день народження контакту."),
+    "birthdays": ("birthdays", "Дні народження на найближчий тиждень."),
+    "note-add": ("note-add <заголовок> <текст нотатки>", "Додати нотатку (заголовок і текст через пробіл)."),
+    "note-search": ("note-search [запит]", "Пошук нотаток за текстом; без запиту — показати всі."),
+    "note-delete": ("note-delete <id>", "Видалити нотатку за номером id."),
+    "note-edit": ("note-edit <id> <новий текст>", "Змінити вміст нотатки за id."),
+    "help": ("help [команда]", "Довідка: усі команди або деталі по одній команді."),
+}
+
+
+def show_help(args: list[str]) -> str:
+    if not args:
+        contact_cmds = [c for c in HELP if not c.startswith("note-") and c != "help"]
+        note_cmds = ["note-add", "note-search", "note-delete", "note-edit"]
+        lines = [
+            "Контакти:",
+            *(_format_help_row(c, HELP[c][0], HELP[c][1]) for c in contact_cmds),
+            "",
+            "Блокнот:",
+            *(_format_help_row(c, HELP[c][0], HELP[c][1]) for c in note_cmds),
+            "",
+            "Інше:",
+            "  help [команда]   — ця довідка",
+            "  close / exit     — вихід з бота",
+        ]
+        return "\n".join(lines)
+    cmd = args[0].lower()
+    if cmd not in HELP:
+        return f"Невідома команда «{cmd}». Введіть help без аргументів для списку команд."
+    usage, desc = HELP[cmd]
+    return f"  {usage}\n  -> {desc}"
+
+
+def _format_help_row(cmd: str, usage: str, desc: str) -> str:
+    return f"  {usage:<45} — {desc}"
+
+
 # ── Handlers ──────────────────────────────────────────────────────────────────
 
 def parse_input(user_input: str) -> tuple[str | None, list[str]]:
@@ -289,10 +335,15 @@ def birthdays(args, book: AddressBook) -> str:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    """Головний цикл бота з адресною книгою. Книга завантажується при старті, зберігається при виході."""
+    """Головний цикл бота з адресною книгою та блокнотом."""
+    from notebook.storage import load_data as load_notebook, save_data as save_notebook
+    from notebook.handlers import note_add, note_search, note_delete, note_edit
+
     book = load_data()
+    notebook = load_notebook()
     commands = {
         "hello": lambda args, book: "Чим можу допомогти?",
+        "help": lambda args, book: show_help(args),
         "add": add_contact,
         "change": change_contact,
         "phone": show_phone,
@@ -301,6 +352,13 @@ def main() -> None:
         "show-birthday": show_birthday,
         "birthdays": birthdays,
     }
+    note_commands = {
+        "note-add": note_add,
+        "note-search": note_search,
+        "note-delete": note_delete,
+        "note-edit": note_edit,
+    }
+    all_commands = {**commands, **note_commands}
     print("Вітаю до бота-помічника!")
     while True:
         user_input = input("Введіть команду: ")
@@ -308,15 +366,17 @@ def main() -> None:
 
         if command in ("close", "exit"):
             save_data(book)
+            save_notebook(notebook)
             print("До зустрічі!")
             break
         if not command:
             continue
-        if command in commands:
+        if command in note_commands:
+            print(note_commands[command](args, notebook))
+        elif command in commands:
             print(commands[command](args, book))
         else:
-            hint = ", ".join(commands.keys()) + ", close, exit"
-            print(f"Невірна команда. Доступні: {hint}")
+            print(f"Невірна команда «{command}». Введіть help — подивитися всі команди та приклади.")
 
 
 if __name__ == "__main__":
