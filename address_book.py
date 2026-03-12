@@ -289,8 +289,12 @@ def birthdays(args, book: AddressBook) -> str:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    """Головний цикл бота з адресною книгою. Книга завантажується при старті, зберігається при виході."""
+    """Головний цикл бота з адресною книгою та блокнотом."""
+    from notebook.storage import load_data as load_notebook, save_data as save_notebook
+    from notebook.handlers import note_add, note_search, note_delete, note_edit
+
     book = load_data()
+    notebook = load_notebook()
     commands = {
         "hello": lambda args, book: "Чим можу допомогти?",
         "add": add_contact,
@@ -301,6 +305,13 @@ def main() -> None:
         "show-birthday": show_birthday,
         "birthdays": birthdays,
     }
+    note_commands = {
+        "note-add": note_add,
+        "note-search": note_search,
+        "note-delete": note_delete,
+        "note-edit": note_edit,
+    }
+    all_commands = {**commands, **note_commands}
     print("Вітаю до бота-помічника!")
     while True:
         user_input = input("Введіть команду: ")
@@ -308,14 +319,17 @@ def main() -> None:
 
         if command in ("close", "exit"):
             save_data(book)
+            save_notebook(notebook)
             print("До зустрічі!")
             break
         if not command:
             continue
-        if command in commands:
+        if command in note_commands:
+            print(note_commands[command](args, notebook))
+        elif command in commands:
             print(commands[command](args, book))
         else:
-            hint = ", ".join(commands.keys()) + ", close, exit"
+            hint = ", ".join(all_commands.keys()) + ", close, exit"
             print(f"Невірна команда. Доступні: {hint}")
 
 
