@@ -1,4 +1,4 @@
-from address_book import input_error
+from core.decorators import input_error
 from notebook.notebook import Notebook
 
 
@@ -33,4 +33,20 @@ def note_delete(args: list[str], notebook: Notebook) -> str:
     if notebook.delete(note_id):
         return f"Нотатку {note_id} видалено."
     raise ValueError("Нотатку не знайдено.")
+
+
+@input_error
+def note_edit(args: list[str], notebook: Notebook) -> str:
+    if len(args) < 2:
+        raise IndexError
+    raw_id, *rest = args
+    try:
+        note_id = int(raw_id)
+    except ValueError:
+        raise ValueError("ID має бути числом.")
+    new_content = " ".join(rest).strip()
+    note = notebook.edit(note_id, content=new_content)
+    if note is None:
+        raise ValueError("Нотатку не знайдено.")
+    return f"Нотатку {note_id} оновлено."
 
