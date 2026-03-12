@@ -4,6 +4,10 @@ import calendar
 import pickle
 from collections import UserDict
 from datetime import date, datetime, timedelta
+from fields.name import Name
+from fields.phone import Phone
+from fields.birthday import Birthday
+from fields.email import Email
 
 
 # ── Утиліти ───────────────────────────────────────────────────────────────────
@@ -31,65 +35,6 @@ def input_error(func):
 
     return inner
 
-
-# ── Fields ────────────────────────────────────────────────────────────────────
-
-class Field:
-    """Базовий клас для полів запису в адресній книзі."""
-
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self) -> str:
-        return str(self.value)
-
-
-class Name(Field):
-    """Поле для зберігання імені контакту. Обов'язкове поле."""
-
-
-class Phone(Field):
-    """Поле для зберігання номера телефону. Валідація: рівно 10 цифр."""
-
-    def __init__(self, value):
-        if not self._is_valid(value):
-            raise ValueError("Номер телефону має містити рівно 10 цифр.")
-        super().__init__(value)
-
-    @staticmethod
-    def _is_valid(value) -> bool:
-        digits = "".join(c for c in str(value) if c.isdigit())
-        return len(digits) == 10
-
-# NEW
-class Email(Field):
-    """Поле для зберігання email."""
-    def __init__(self, value):
-        if "@" not in value or "." not in value:
-            raise ValueError("Невірний формат email.")
-        super().__init__(value)
-
-
-class Birthday(Field):
-    """Поле дня народження. Формат вводу: DD.MM.YYYY."""
-
-    def __init__(self, value):
-        try:
-            if isinstance(value, date):
-                self._value = value
-            else:
-                self._value = datetime.strptime(str(value).strip(), "%d.%m.%Y").date()
-        except ValueError:
-            raise ValueError("Невірний формат дати. Використовуйте DD.MM.YYYY.")
-
-    @property
-    def value(self):
-        return self._value
-
-    def __str__(self) -> str:
-        return self._value.strftime("%d.%m.%Y")
-
-
 # ── Record ────────────────────────────────────────────────────────────────────
 
 class Record:
@@ -98,15 +43,15 @@ class Record:
     def __init__(self, name):
         self.name = Name(name)
         self.phones = []
+        self.email = None
         self.birthday = None
-        self.email = None   # NEW
 
     def add_phone(self, phone) -> None:
         """Додає номер телефону до запису."""
         self.phones.append(Phone(phone))
 
 # NEW
-    
+
     def add_email(self, email):
         """Додає email до контакту."""
         self.email = Email(email)
@@ -122,7 +67,7 @@ class Record:
         if self.email is None:
             raise ValueError("Email не вказано.")
         self.email = None
-    
+
     def remove_phone(self, phone) -> None:
         """Видаляє номер телефону з запису."""
         for p in self.phones:
@@ -150,7 +95,7 @@ class Record:
         """Додає або оновлює день народження контакту."""
         self.birthday = Birthday(value)
 
-    # UPD (NEW) 
+    # UPD (NEW)
     def __str__(self) -> str:
         phones_str = "; ".join(p.value for p in self.phones) if self.phones else "—"
         email_str = self.email.value if self.email else "—"
@@ -176,7 +121,7 @@ class AddressBook(UserDict):
         """Видаляє запис за іменем."""
         if name in self.data:
             del self.data[name]
-            
+
     # NEW
     def search(self, query) -> list[Record]:
         """
@@ -200,7 +145,7 @@ class AddressBook(UserDict):
                     break
         return results
 
-    
+
     def get_upcoming_birthdays(self) -> list[dict[str, str]]:
         """
         Повертає список контактів, яких потрібно привітати протягом наступних 7 днів.
@@ -363,6 +308,18 @@ def add_birthday(args, book: AddressBook) -> str:
     record.add_birthday(birthday_str)
     return "День народження додано."
 
+@input_error
+def add_email(args, book: AddressBook):
+    name, email, *_ = args
+    record = book.find(name)
+
+    if record is None:
+        raise KeyError
+
+    record.add_email(email)
+
+    return "Email додано."
+
 
 @input_error
 def show_birthday(args, book: AddressBook) -> str:
@@ -374,6 +331,26 @@ def show_birthday(args, book: AddressBook) -> str:
     if record.birthday is None:
         return f"У контакту {name} не вказано день народження."
     return f"{name}: {record.birthday}"
+
+@input_error
+def show_contact(args, book: AddressBook) -> str:
+    """Показує повну інформацію про контакт."""
+    name, *_ = args
+    record = book.find(name)
+
+    if record is None:
+        raise KeyError
+
+    phones = ", ".join(p.value for p in record.phones) if record.phones else "—"
+    email = record.email.value if record.email else "—"
+    birthday = str(record.birthday) if record.birthday else "—"
+
+    return (
+        f"Ім'я: {record.name.value}\n"
+        f"Телефони: {phones}\n"
+        f"Email: {email}\n"
+        f"День народження: {birthday}"
+    )
 
 
 @input_error
@@ -419,6 +396,8 @@ def main() -> None:
         "show-birthday": show_birthday,
         "birthdays": birthdays,
         "search": search_contact,  # <-- додано
+        "add-email": add_email,
+        "show": show_contact,  # ← новая команда
     }
     note_commands = {
         "note-add": note_add,
