@@ -92,10 +92,28 @@ class Record:
 
     # UPD (NEW)
     def __str__(self) -> str:
-        phones_str = "; ".join(p.value for p in self.phones) if self.phones else "—"
-        email_str = self.email.value if self.email else "—"
-        birthday_str = str(self.birthday) if self.birthday else "—"
-        return f"Contact name: {self.name.value}, phones: {phones_str}, email: {email_str}, birthday: {birthday_str}"
+        lines = []
+
+        lines.append(f"👤 {self.name.value}")
+
+        if self.phones:
+            lines.append("  ☎️ Phones:")
+            for phone in self.phones:
+                lines.append(f"     • {phone.value}")
+        else:
+            lines.append("  ☎️фдд Phones: —")
+
+        if self.email:
+            lines.append(f"  📧 Email: {self.email.value}")
+        else:
+            lines.append("  📧 Email: —")
+
+        if self.birthday:
+            lines.append(f"  🎂 Birthday: {self.birthday}")
+        else:
+            lines.append("  🎂 Birthday: —")
+
+        return "\n".join(lines)
 
 # ── AddressBook ───────────────────────────────────────────────────────────────
 
@@ -254,11 +272,8 @@ def show_all(args, book: AddressBook) -> str:
     """Показує всі контакти в адресній книзі."""
     if not book.data:
         return "Адресна книга порожня."
-    lines = []
-    for record in book.data.values():
-        phones_str = ", ".join(p.value for p in record.phones) if record.phones else "—"
-        lines.append(f"{record.name.value}: {phones_str}")
-    return "\n".join(lines)
+
+    return "\n\n".join(str(record) for record in book.data.values())
 
 
 @input_error
