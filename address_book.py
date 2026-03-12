@@ -61,6 +61,14 @@ class Phone(Field):
         digits = "".join(c for c in str(value) if c.isdigit())
         return len(digits) == 10
 
+# NEW
+class Email(Field):
+    """Поле для зберігання email."""
+    def __init__(self, value):
+        if "@" not in value or "." not in value:
+            raise ValueError("Невірний формат email.")
+        super().__init__(value)
+
 
 class Birthday(Field):
     """Поле дня народження. Формат вводу: DD.MM.YYYY."""
@@ -91,11 +99,30 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        self.email = None   # NEW
 
     def add_phone(self, phone) -> None:
         """Додає номер телефону до запису."""
         self.phones.append(Phone(phone))
 
+# NEW
+    
+    def add_email(self, email):
+        """Додає email до контакту."""
+        self.email = Email(email)
+
+    def edit_email(self, new_email):
+        """Оновлює email контакту."""
+        if self.email is None:
+            raise ValueError("Email не вказано.")
+        self.email = Email(new_email)
+
+    def remove_email(self):
+        """Видаляє email контакту."""
+        if self.email is None:
+            raise ValueError("Email не вказано.")
+        self.email = None
+    
     def remove_phone(self, phone) -> None:
         """Видаляє номер телефону з запису."""
         for p in self.phones:
@@ -123,9 +150,13 @@ class Record:
         """Додає або оновлює день народження контакту."""
         self.birthday = Birthday(value)
 
+    # UPD (NEW) 
     def __str__(self) -> str:
         phones_str = "; ".join(p.value for p in self.phones) if self.phones else "—"
-        return f"Contact name: {self.name.value}, phones: {phones_str}"
+        email_str = self.email.value if self.email else "—"
+        birthday_str = str(self.birthday) if self.birthday else "—"
+        return f"Contact name: {self.name.value}, phones: {phones_str}, email: {email_str}, birthday: {birthday_str}"
+
 
 
 # ── AddressBook ───────────────────────────────────────────────────────────────
@@ -145,7 +176,31 @@ class AddressBook(UserDict):
         """Видаляє запис за іменем."""
         if name in self.data:
             del self.data[name]
+            
+    # NEW
+    def search(self, query) -> list[Record]:
+        """
+        Пошук контакту за іменем, телефоном або email.
+        Повертає список записів, що підходять під запит.
+        """
+        results = []
+        for record in self.data.values():
+            # Пошук по імені
+            if query.lower() in record.name.value.lower():
+                results.append(record)
+                continue
+            # Пошук по email
+            if hasattr(record, 'email') and record.email and query.lower() in record.email.value.lower():
+                results.append(record)
+                continue
+            # Пошук по телефону
+            for phone in record.phones:
+                if query in phone.value:
+                    results.append(record)
+                    break
+        return results
 
+    
     def get_upcoming_birthdays(self) -> list[dict[str, str]]:
         """
         Повертає список контактів, яких потрібно привітати протягом наступних 7 днів.
@@ -285,7 +340,19 @@ def birthdays(args, book: AddressBook) -> str:
         f"{item['name']}: {item['congratulation_date']}" for item in upcoming
     )
 
-
+@input_error
+def search_contact(args, book: AddressBook) -> str: # NEW
+    """Пошук контактів за ім'ям, телефоном або email."""
+    query, *_ = args
+    results = book.search(query)
+    if not results:
+        return "Контактів, що підходять під запит, не знайдено."
+    lines = []
+    for record in results:
+        phones_str = ", ".join(p.value for p in record.phones) if record.phones else "—"
+        email_str = record.email.value if hasattr(record, 'email') and record.email else "—"
+        lines.append(f"{record.name.value}: телефони: {phones_str}, email: {email_str}")
+    return "\n".join(lines)
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -300,6 +367,7 @@ def main() -> None:
         "add-birthday": add_birthday,
         "show-birthday": show_birthday,
         "birthdays": birthdays,
+        "search": search_contact,  # <-- додано
     }
     print("Вітаю до бота-помічника!")
     while True:
