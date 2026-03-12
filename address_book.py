@@ -1,21 +1,16 @@
 # ── Імпорти ───────────────────────────────────────────────────────────────────
 
-import calendar
+
 import pickle
 from collections import UserDict
-from datetime import date, datetime, timedelta
 from fields.name import Name
 from fields.phone import Phone
 from fields.birthday import Birthday
 from fields.email import Email
+from birthdays.get_upcoming_birthdays import get_upcoming_birthdays
 
 
 # ── Утиліти ───────────────────────────────────────────────────────────────────
-
-def _birthday_in_year(birth: date, year: int) -> date:
-    if birth.month == 2 and birth.day == 29 and not calendar.isleap(year):
-        return date(year, 2, 28)
-    return birth.replace(year=year)
 
 
 # ── Декоратор ─────────────────────────────────────────────────────────────────
@@ -102,8 +97,6 @@ class Record:
         birthday_str = str(self.birthday) if self.birthday else "—"
         return f"Contact name: {self.name.value}, phones: {phones_str}, email: {email_str}, birthday: {birthday_str}"
 
-
-
 # ── AddressBook ───────────────────────────────────────────────────────────────
 
 class AddressBook(UserDict):
@@ -144,36 +137,6 @@ class AddressBook(UserDict):
                     results.append(record)
                     break
         return results
-
-
-    def get_upcoming_birthdays(self) -> list[dict[str, str]]:
-        """
-        Повертає список контактів, яких потрібно привітати протягом наступних 7 днів.
-        Вихідні (субота, неділя) переносяться на понеділок.
-        """
-        today = date.today()
-        result = []
-        for record in self.data.values():
-            if record.birthday is None:
-                continue
-            birth = record.birthday.value
-            birthday_this_year = _birthday_in_year(birth, today.year)
-            delta_days = (birthday_this_year - today).days
-            if delta_days < 0:
-                birthday_this_year = _birthday_in_year(birth, today.year + 1)
-                delta_days = (birthday_this_year - today).days
-            if 0 <= delta_days <= 7:
-                congratulation_date = birthday_this_year
-                if congratulation_date.weekday() == 5:
-                    congratulation_date += timedelta(days=2)
-                elif congratulation_date.weekday() == 6:
-                    congratulation_date += timedelta(days=1)
-                result.append({
-                    "name": record.name.value,
-                    "congratulation_date": congratulation_date.strftime("%d.%m.%Y"),
-                })
-        return result
-
 
 # ── Серіалізація ──────────────────────────────────────────────────────────────
 
@@ -355,12 +318,14 @@ def show_contact(args, book: AddressBook) -> str:
 
 @input_error
 def birthdays(args, book: AddressBook) -> str:
-    """Повертає список контактів з днями народження на наступному тижні."""
-    upcoming = book.get_upcoming_birthdays()
+    """Повертає список контактів з днями народження на протязі n днів."""
+    days = int(args[0]) if args else 7
+
+    upcoming = get_upcoming_birthdays(book, days)
     if not upcoming:
-        return "На наступному тижні днів народження немає."
+        return f"На протязі {days} днів, дні народження ніхто не святкує."
     return "\n".join(
-        f"{item['name']}: {item['congratulation_date']}" for item in upcoming
+        f"Привітання з Днем Народження {item['name']}: {item['congratulation_date']}" for item in upcoming
     )
 
 @input_error
@@ -394,7 +359,7 @@ def main() -> None:
         "all": show_all,
         "add-birthday": add_birthday,
         "show-birthday": show_birthday,
-        "birthdays": birthdays,
+        "show-birthdays": birthdays,
         "search": search_contact,  # <-- додано
         "add-email": add_email,
         "show": show_contact,  # ← новая команда
