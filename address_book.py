@@ -50,6 +50,24 @@ class Record:
         """Додає номер телефону до запису."""
         self.phones.append(Phone(phone))
 
+# NEW
+
+    def add_email(self, email):
+        """Додає email до контакту."""
+        self.email = Email(email)
+
+    def edit_email(self, new_email):
+        """Оновлює email контакту."""
+        if self.email is None:
+            raise ValueError("Email не вказано.")
+        self.email = Email(new_email)
+
+    def remove_email(self):
+        """Видаляє email контакту."""
+        if self.email is None:
+            raise ValueError("Email не вказано.")
+        self.email = None
+
     def remove_phone(self, phone) -> None:
         """Видаляє номер телефону з запису."""
         for p in self.phones:
@@ -77,14 +95,14 @@ class Record:
         """Додає або оновлює день народження контакту."""
         self.birthday = Birthday(value)
 
-    def add_email(self, email):
-        self.email = Email(email)
-
+    # UPD (NEW)
     def __str__(self) -> str:
         phones_str = "; ".join(p.value for p in self.phones) if self.phones else "—"
         email_str = self.email.value if self.email else "—"
+        birthday_str = str(self.birthday) if self.birthday else "—"
+        return f"Contact name: {self.name.value}, phones: {phones_str}, email: {email_str}, birthday: {birthday_str}"
 
-        return f"Contact name: {self.name.value}, phones: {phones_str}, email: {email_str}"
+
 
 # ── AddressBook ───────────────────────────────────────────────────────────────
 
@@ -103,6 +121,30 @@ class AddressBook(UserDict):
         """Видаляє запис за іменем."""
         if name in self.data:
             del self.data[name]
+
+    # NEW
+    def search(self, query) -> list[Record]:
+        """
+        Пошук контакту за іменем, телефоном або email.
+        Повертає список записів, що підходять під запит.
+        """
+        results = []
+        for record in self.data.values():
+            # Пошук по імені
+            if query.lower() in record.name.value.lower():
+                results.append(record)
+                continue
+            # Пошук по email
+            if hasattr(record, 'email') and record.email and query.lower() in record.email.value.lower():
+                results.append(record)
+                continue
+            # Пошук по телефону
+            for phone in record.phones:
+                if query in phone.value:
+                    results.append(record)
+                    break
+        return results
+
 
     def get_upcoming_birthdays(self) -> list[dict[str, str]]:
         """
@@ -148,6 +190,52 @@ def load_data(filename: str = "addressbook.pkl") -> AddressBook:
             return pickle.load(f)
     except FileNotFoundError:
         return AddressBook()
+
+
+# ── Довідка (help) ────────────────────────────────────────────────────────────
+
+HELP: dict[str, tuple[str, str]] = {
+    "hello": ("hello", "Привітання."),
+    "add": ("add <ім'я> <телефон>", "Додати контакт або телефон до існуючого (телефон — 10 цифр)."),
+    "change": ("change <ім'я> <старий_телефон> <новий_телефон>", "Змінити номер телефону контакту."),
+    "phone": ("phone <ім'я>", "Показати телефони контакту."),
+    "all": ("all", "Показати всі контакти."),
+    "add-birthday": ("add-birthday <ім'я> <DD.MM.YYYY>", "Додати день народження контакту."),
+    "show-birthday": ("show-birthday <ім'я>", "Показати день народження контакту."),
+    "birthdays": ("birthdays", "Дні народження на найближчий тиждень."),
+    "note-add": ("note-add <заголовок> <текст нотатки>", "Додати нотатку (заголовок і текст через пробіл)."),
+    "note-search": ("note-search [запит]", "Пошук нотаток за текстом; без запиту — показати всі."),
+    "note-delete": ("note-delete <id>", "Видалити нотатку за номером id."),
+    "note-edit": ("note-edit <id> <новий текст>", "Змінити вміст нотатки за id."),
+    "help": ("help [команда]", "Довідка: усі команди або деталі по одній команді."),
+}
+
+
+def show_help(args: list[str]) -> str:
+    if not args:
+        contact_cmds = [c for c in HELP if not c.startswith("note-") and c != "help"]
+        note_cmds = ["note-add", "note-search", "note-delete", "note-edit"]
+        lines = [
+            "Контакти:",
+            *(_format_help_row(c, HELP[c][0], HELP[c][1]) for c in contact_cmds),
+            "",
+            "Блокнот:",
+            *(_format_help_row(c, HELP[c][0], HELP[c][1]) for c in note_cmds),
+            "",
+            "Інше:",
+            "  help [команда]   — ця довідка",
+            "  close / exit     — вихід з бота",
+        ]
+        return "\n".join(lines)
+    cmd = args[0].lower()
+    if cmd not in HELP:
+        return f"Невідома команда «{cmd}». Введіть help без аргументів для списку команд."
+    usage, desc = HELP[cmd]
+    return f"  {usage}\n  -> {desc}"
+
+
+def _format_help_row(cmd: str, usage: str, desc: str) -> str:
+    return f"  {usage:<45} — {desc}"
 
 
 # ── Handlers ──────────────────────────────────────────────────────────────────
@@ -275,14 +363,31 @@ def birthdays(args, book: AddressBook) -> str:
         f"{item['name']}: {item['congratulation_date']}" for item in upcoming
     )
 
-
+@input_error
+def search_contact(args, book: AddressBook) -> str: # NEW
+    """Пошук контактів за ім'ям, телефоном або email."""
+    query, *_ = args
+    results = book.search(query)
+    if not results:
+        return "Контактів, що підходять під запит, не знайдено."
+    lines = []
+    for record in results:
+        phones_str = ", ".join(p.value for p in record.phones) if record.phones else "—"
+        email_str = record.email.value if hasattr(record, 'email') and record.email else "—"
+        lines.append(f"{record.name.value}: телефони: {phones_str}, email: {email_str}")
+    return "\n".join(lines)
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    """Головний цикл бота з адресною книгою. Книга завантажується при старті, зберігається при виході."""
+    """Головний цикл бота з адресною книгою та блокнотом."""
+    from notebook.storage import load_data as load_notebook, save_data as save_notebook
+    from notebook.handlers import note_add, note_search, note_delete, note_edit
+
     book = load_data()
+    notebook = load_notebook()
     commands = {
         "hello": lambda args, book: "Чим можу допомогти?",
+        "help": lambda args, book: show_help(args),
         "add": add_contact,
         "change": change_contact,
         "phone": show_phone,
@@ -290,9 +395,17 @@ def main() -> None:
         "add-birthday": add_birthday,
         "show-birthday": show_birthday,
         "birthdays": birthdays,
+        "search": search_contact,  # <-- додано
         "add-email": add_email,
         "show": show_contact,  # ← новая команда
     }
+    note_commands = {
+        "note-add": note_add,
+        "note-search": note_search,
+        "note-delete": note_delete,
+        "note-edit": note_edit,
+    }
+    all_commands = {**commands, **note_commands}
     print("Вітаю до бота-помічника!")
     while True:
         user_input = input("Введіть команду: ")
@@ -300,15 +413,17 @@ def main() -> None:
 
         if command in ("close", "exit"):
             save_data(book)
+            save_notebook(notebook)
             print("До зустрічі!")
             break
         if not command:
             continue
-        if command in commands:
+        if command in note_commands:
+            print(note_commands[command](args, notebook))
+        elif command in commands:
             print(commands[command](args, book))
         else:
-            hint = ", ".join(commands.keys()) + ", close, exit"
-            print(f"Невірна команда. Доступні: {hint}")
+            print(f"Невірна команда «{command}». Введіть help — подивитися всі команди та приклади.")
 
 
 if __name__ == "__main__":
