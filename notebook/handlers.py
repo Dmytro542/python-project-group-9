@@ -34,20 +34,3 @@ def note_delete(args: list[str], notebook: Notebook) -> str:
         return f"Нотатку {note_id} видалено."
     raise ValueError("Нотатку не знайдено.")
 
-
-@input_error
-def note_edit(args: list[str], notebook: Notebook) -> str:
-    if len(args) < 2:
-        raise IndexError
-    raw_id, *rest = args
-    try:
-        note_id = int(raw_id)
-    except ValueError:
-        raise ValueError("ID має бути числом.")
-    note = notebook.get(note_id)
-    if note is None:
-        raise ValueError("Нотатку не знайдено.")
-    new_content = " ".join(rest).strip() if rest else ""
-    if new_content:
-        notebook.edit(note_id, content=new_content)
-    return f"Нотатку {note_id} оновлено."
