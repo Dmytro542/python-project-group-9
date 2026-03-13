@@ -1,4 +1,5 @@
 from core.decorators import input_error
+from core.table_utils import contacts_table
 from contacts.models import AddressBook, Record
 from birthdays import get_upcoming_birthdays
 from core.help_text import show_help as _show_help
@@ -53,11 +54,7 @@ def show_phone(args, book: AddressBook) -> str:
 def show_all(args, book: AddressBook) -> str:
     if not book.data:
         return "Адресна книга порожня."
-    lines = []
-    for record in book.data.values():
-        phones_str = ", ".join(p.value for p in record.phones) if record.phones else "—"
-        lines.append(f"{record.name.value}: {phones_str}")
-    return "\n".join(lines)
+    return contacts_table(book.data.values())
 
 
 @input_error
@@ -81,6 +78,19 @@ def add_email(args, book: AddressBook) -> str:
 
 
 @input_error
+def add_address(args, book: AddressBook) -> str:
+    if len(args) < 2:
+        raise IndexError
+    name = args[0]
+    address = " ".join(args[1:]).strip()
+    record = book.find(name)
+    if record is None:
+        raise KeyError
+    record.add_address(address)
+    return "Адресу додано."
+
+
+@input_error
 def show_birthday(args, book: AddressBook) -> str:
     name, *_ = args
     record = book.find(name)
@@ -100,10 +110,12 @@ def show_contact(args, book: AddressBook) -> str:
     phones = ", ".join(p.value for p in record.phones) if record.phones else "—"
     email = record.email.value if record.email else "—"
     birthday = str(record.birthday) if record.birthday else "—"
+    address = record.address if record.address else "—"
     return (
         f"Ім'я: {record.name.value}\n"
         f"Телефони: {phones}\n"
         f"Email: {email}\n"
+        f"Адреса: {address}\n"
         f"День народження: {birthday}"
     )
 
@@ -125,9 +137,15 @@ def search_contact(args, book: AddressBook) -> str:
     results = book.search(query)
     if not results:
         return "Контактів, що підходять під запит, не знайдено."
-    lines = []
-    for record in results:
-        phones_str = ", ".join(p.value for p in record.phones) if record.phones else "—"
-        email_str = record.email.value if hasattr(record, "email") and record.email else "—"
-        lines.append(f"{record.name.value}: телефони: {phones_str}, email: {email_str}")
-    return "\n".join(lines)
+    return contacts_table(results)
+
+
+@input_error
+def delete_contact(args, book: AddressBook) -> str:
+    if not args:
+        raise IndexError
+    name = args[0]
+    if book.find(name) is None:
+        raise KeyError
+    book.delete(name)
+    return f"Контакт «{name}» видалено."

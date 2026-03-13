@@ -12,6 +12,13 @@ class Record:
         self.phones = []
         self.email = None
         self.birthday = None
+        self.address = None
+
+    def add_address(self, value: str) -> None:
+        self.address = value.strip() if value else None
+
+    def edit_address(self, value: str) -> None:
+        self.address = value.strip() if value else None
 
     def add_phone(self, phone) -> None:
         self.phones.append(Phone(phone))
@@ -56,7 +63,8 @@ class Record:
         phones_str = "; ".join(p.value for p in self.phones) if self.phones else "—"
         email_str = self.email.value if self.email else "—"
         birthday_str = str(self.birthday) if self.birthday else "—"
-        return f"Contact name: {self.name.value}, phones: {phones_str}, email: {email_str}, birthday: {birthday_str}"
+        address_str = self.address if self.address else "—"
+        return f"Contact name: {self.name.value}, phones: {phones_str}, email: {email_str}, birthday: {birthday_str}, address: {address_str}"
 
 
 class AddressBook(UserDict):
@@ -83,4 +91,6 @@ class AddressBook(UserDict):
                 if query in phone.value:
                     results.append(record)
                     break
+            if hasattr(record, "address") and record.address and query.lower() in record.address.lower():
+                results.append(record)
         return results
