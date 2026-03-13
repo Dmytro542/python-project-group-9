@@ -8,6 +8,8 @@ from fields.phone import Phone
 from fields.birthday import Birthday
 from fields.email import Email
 from birthdays.get_upcoming_birthdays import get_upcoming_birthdays
+from notebook.storage import load_data as load_notebook, save_data as save_notebook
+from notebook.handlers import note_add, note_search, note_delete, note_edit, note_search_tag, note_sort_by_tag, note_sort_by_date
 
 
 # ── Утиліти ───────────────────────────────────────────────────────────────────
@@ -186,6 +188,9 @@ HELP: dict[str, tuple[str, str]] = {
     "birthdays": ("birthdays", "Дні народження на найближчий тиждень."),
     "note-add": ("note-add <заголовок> <текст нотатки>", "Додати нотатку (заголовок і текст через пробіл)."),
     "note-search": ("note-search [запит]", "Пошук нотаток за текстом; без запиту — показати всі."),
+    "note-search-tag": ("note-search-tag <#тег>", "Пошук нотаток за тегом (наприклад: #робота)."),
+    "note-sort-tag": ("note-sort-tag", "Показати всі нотатки відсортовані за тегами."),
+    "note-sort-date": ("note-sort-date [desc]", "Показати нотатки відсортовані за датою (desc — від нових)."),
     "note-delete": ("note-delete <id>", "Видалити нотатку за номером id."),
     "note-edit": ("note-edit <id> <новий текст>", "Змінити вміст нотатки за id."),
     "help": ("help [команда]", "Довідка: усі команди або деталі по одній команді."),
@@ -195,7 +200,7 @@ HELP: dict[str, tuple[str, str]] = {
 def show_help(args: list[str]) -> str:
     if not args:
         contact_cmds = [c for c in HELP if not c.startswith("note-") and c != "help"]
-        note_cmds = ["note-add", "note-search", "note-delete", "note-edit"]
+        note_cmds = ["note-add", "note-search", "note-search-tag", "note-sort-tag", "note-sort-date", "note-delete", "note-edit"]
         lines = [
             "Контакти:",
             *(_format_help_row(c, HELP[c][0], HELP[c][1]) for c in contact_cmds),
@@ -360,9 +365,6 @@ def search_contact(args, book: AddressBook) -> str: # NEW
 
 def main() -> None:
     """Головний цикл бота з адресною книгою та блокнотом."""
-    from notebook.storage import load_data as load_notebook, save_data as save_notebook
-    from notebook.handlers import note_add, note_search, note_delete, note_edit
-
     book = load_data()
     notebook = load_notebook()
     commands = {
@@ -382,6 +384,9 @@ def main() -> None:
     note_commands = {
         "note-add": note_add,
         "note-search": note_search,
+        "note-search-tag": note_search_tag,
+        "note-sort-tag": note_sort_by_tag,
+        "note-sort-date": note_sort_by_date,
         "note-delete": note_delete,
         "note-edit": note_edit,
     }
