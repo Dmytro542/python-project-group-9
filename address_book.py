@@ -386,9 +386,23 @@ def main() -> None:
         "note-edit": note_edit,
     }
     all_commands = {**commands, **note_commands}
+    try:
+        from prompt_helper import prompt_input
+    except ImportError:
+        prompt_input = None
+
     print("Вітаю до бота-помічника!")
     while True:
-        user_input = input("Введіть команду: ")
+        try:
+            if prompt_input:
+                user_input = prompt_input()
+            else:
+                user_input = input("Введіть команду: ")
+        except (KeyboardInterrupt, EOFError):
+            save_data(book)
+            save_notebook(notebook)
+            print("\nДо зустрічі!")
+            break
         command, args = parse_input(user_input)
 
         if command in ("close", "exit"):
