@@ -1,3 +1,24 @@
+from core.theme import TABLE_HEADER, TABLE_BORDER, TABLE_SEP, RESET
+
+
+def colorize_table(raw: str) -> str:
+    """Add colors to a PrettyTable string."""
+    lines = raw.split("\n")
+    result = []
+    for i, line in enumerate(lines):
+        if line.startswith("+"):
+            result.append(f"{TABLE_BORDER}{line}{RESET}")
+        elif line.startswith("|"):
+            if i == 1:
+                result.append(f"{TABLE_HEADER}{line}{RESET}")
+            else:
+                colored = line.replace("|", f"{TABLE_SEP}|{RESET}")
+                result.append(colored)
+        else:
+            result.append(line)
+    return "\n".join(result)
+
+
 def contacts_table(records, include_address=True):
     from prettytable import PrettyTable
     headers = ["Ім'я", "Телефони", "Email", "День народження"]
@@ -14,7 +35,7 @@ def contacts_table(records, include_address=True):
             row.append(address_str)
         row.append(birthday_str)
         table.add_row(row)
-    return table.get_string()
+    return colorize_table(table.get_string())
 
 
 def notes_table(notes, tag_header="Теги"):
@@ -26,4 +47,4 @@ def notes_table(notes, tag_header="Теги"):
         tags_str = ", ".join(tags_val) if tags_val else "—"
         content_short = (note.content[:50] + "…") if len(note.content) > 50 else note.content
         table.add_row([note.id, note.title, content_short, tags_str])
-    return table.get_string()
+    return colorize_table(table.get_string())

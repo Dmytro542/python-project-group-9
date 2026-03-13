@@ -1,3 +1,5 @@
+from core.theme import HEADER, INFO, MUTED, RESET
+
 HELP: dict[str, tuple[str, str]] = {
     "hello": ("hello", "Привітання."),
     "help": ("help [команда]", "Довідка: усі команди або деталі по одній команді."),
@@ -23,7 +25,7 @@ HELP: dict[str, tuple[str, str]] = {
 
 
 def _format_help_row(cmd: str, usage: str, desc: str) -> str:
-    return f"  {usage:<45} — {desc}"
+    return f"  {INFO}{usage:<45}{RESET} — {MUTED}{desc}{RESET}"
 
 
 def show_help(args: list[str], commands_info: dict[str, tuple[str, str]] | None = None) -> str:
@@ -32,19 +34,19 @@ def show_help(args: list[str], commands_info: dict[str, tuple[str, str]] | None 
         contact_cmds = [c for c in info if not c.startswith("note-") and c not in ("help",)]
         note_cmds = ["note-add", "note-search", "note-delete", "note-edit", "note-sort"]
         lines = [
-            "Контакти:",
+            f"{HEADER}Контакти:{RESET}",
             *(_format_help_row(c, info[c][0], info[c][1]) for c in contact_cmds if c in info),
             "",
-            "Блокнот:",
+            f"{HEADER}Блокнот:{RESET}",
             *(_format_help_row(c, info[c][0], info[c][1]) for c in note_cmds if c in info),
             "",
-            "Інше:",
-            "  help [команда]   — ця довідка",
-            "  close / exit     — вихід з бота",
+            f"{HEADER}Інше:{RESET}",
+            f"  {INFO}{'help [команда]':<45}{RESET} — {MUTED}ця довідка{RESET}",
+            f"  {INFO}{'close / exit':<45}{RESET} — {MUTED}вихід з бота{RESET}",
         ]
         return "\n".join(lines)
     cmd = args[0].lower()
     if cmd not in info:
         return f"Невідома команда «{cmd}». Введіть help без аргументів для списку команд."
     usage, desc = info[cmd]
-    return f"  {usage}\n  -> {desc}"
+    return f"  {INFO}{usage}{RESET}\n  -> {MUTED}{desc}{RESET}"

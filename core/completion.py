@@ -24,8 +24,10 @@ def _command_completer(command_names: list[str]):
 def read_line_with_completion(prompt_text: str, command_names: list[str]) -> str:
     try:
         from prompt_toolkit import prompt
+        from prompt_toolkit.formatted_text import HTML
         completer = _command_completer(command_names)
-        return prompt(prompt_text, completer=completer)
+        styled_prompt = HTML(f"<b><yellow>{prompt_text}</yellow></b>")
+        return prompt(styled_prompt, completer=completer)
     except ImportError:
         return input(prompt_text)
     except Exception as e:

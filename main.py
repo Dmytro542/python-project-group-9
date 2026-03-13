@@ -1,9 +1,35 @@
 from core.parser import parse_input
 from core.completion import get_command_matches, read_line_with_completion
+from core.theme import (
+    MENU_TITLE, MENU_KEY, MENU_OPTION, RESET,
+    SUCCESS, ERROR, WARNING, INFO,
+    success, error, warning, info, header,
+)
 from contacts.storage import load_data, save_data as save_contacts
 from contacts import handlers as contact_handlers
 from notebook.storage import load_data as load_notebook, save_data as save_notebook
 from notebook.handlers import note_add, note_search, note_delete, note_edit, note_sort
+
+
+_ERROR_KEYWORDS = ("не знайдено", "невірн", "помилка", "неправильн", "не існує", "відсутн")
+_SUCCESS_KEYWORDS = ("додано", "оновлено", "видалено", "змінено", "збережено", "встановлено")
+
+
+def _print_result(result: str) -> None:
+    """Smart output coloring based on content."""
+    if not result:
+        return
+    text = result.strip()
+    if text.startswith("+") or text.startswith("\033"):
+        print(result)
+        return
+    lower = text.lower()
+    if any(kw in lower for kw in _ERROR_KEYWORDS):
+        print(error(text))
+    elif any(kw in lower for kw in _SUCCESS_KEYWORDS):
+        print(success(text))
+    else:
+        print(info(text))
 
 
 def _register_commands():
@@ -34,28 +60,42 @@ def _register_commands():
     return {**commands, **note_commands}, commands, note_commands
 
 
+def _banner():
+    title = "Бот-помічник SMART TEAM"
+    width = len(title) + 6
+    print(f"\n{MENU_TITLE}╔{'═' * width}╗{RESET}")
+    print(f"{MENU_TITLE}║{RESET}   {header(title)}   {MENU_TITLE}║{RESET}")
+    print(f"{MENU_TITLE}╚{'═' * width}╝{RESET}")
+
+
 def _main_menu_prompt():
-    print("\n--- Головне меню ---")
-    print("  1 — Адресна книга")
-    print("  2 — Нотатки")
-    print("  0 — Вихід")
+    print(f"\n{MENU_TITLE}--- Головне меню ---{RESET}")
+    print(f"  {MENU_KEY}1{RESET} — {MENU_OPTION}Адресна книга{RESET}")
+    print(f"  {MENU_KEY}2{RESET} — {MENU_OPTION}Нотатки{RESET}")
+    print(f"  {MENU_KEY}0{RESET} — {MENU_OPTION}Вихід{RESET}")
     return read_line_with_completion("Оберіть пункт: ", ["1", "2", "0"]).strip()
 
 
 def main() -> None:
+    try:
+        from core.intro import play_intro
+        play_intro()
+    except Exception:
+        pass
+
     book = load_data()
     notebook = load_notebook()
     all_commands, commands, note_commands = _register_commands()
     contact_names = list(commands.keys()) + ["back"]
     note_names = list(note_commands.keys()) + ["back"]
 
-    print("Вітаю до бота-помічника!")
+    _banner()
     while True:
         choice = _main_menu_prompt()
         if choice == "0":
             save_contacts(book)
             save_notebook(notebook)
-            print("До зустрічі!")
+            print(f"\n{SUCCESS}[OK] До зустрічi!{RESET}")
             break
         if choice == "1":
             while True:
@@ -66,13 +106,13 @@ def main() -> None:
                 if not command:
                     continue
                 if command in commands:
-                    print(commands[command](args, book))
+                    _print_result(commands[command](args, book))
                 else:
                     hints = get_command_matches(command, list(commands.keys()))
                     if hints:
-                        print(f"Невірна команда «{command}». Можливі: {', '.join(hints)}, back")
+                        print(warning(f"Невірна команда «{command}». Можливі: {', '.join(hints)}, back"))
                     else:
-                        print(f"Невірна команда «{command}». Введіть help — список команд, back — у меню.")
+                        print(warning(f"Невірна команда «{command}». Введіть help — список команд, back — у меню."))
             continue
         if choice == "2":
             while True:
@@ -83,15 +123,15 @@ def main() -> None:
                 if not command:
                     continue
                 if command in note_commands:
-                    print(note_commands[command](args, notebook))
+                    _print_result(note_commands[command](args, notebook))
                 else:
                     hints = get_command_matches(command, list(note_commands.keys()))
                     if hints:
-                        print(f"Невірна команда «{command}». Можливі: {', '.join(hints)}, back")
+                        print(warning(f"Невірна команда «{command}». Можливі: {', '.join(hints)}, back"))
                     else:
-                        print(f"Невірна команда «{command}». Введіть back — у меню.")
+                        print(warning(f"Невірна команда «{command}». Введіть back — у меню."))
             continue
-        print("Оберіть 1, 2 або 0.")
+        print(warning("Оберіть 1, 2 або 0."))
 
 
 if __name__ == "__main__":
