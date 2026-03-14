@@ -22,7 +22,7 @@ def sort_notes_by_tag(notebook: Notebook) -> list[Note]:
     """Сортування нотаток за першим тегом (алфавітно). Нотатки без тегів — в кінці."""
     def sort_key(note: Note) -> str:
         tags = _extract_tags(note)
-        return tags[0] if tags else "я" * 10  # без тегів — в кінець
+        return tags[0] if tags else "я" * 10
 
     return sorted(notebook._notes.values(), key=sort_key)
 
@@ -37,10 +37,5 @@ def sort_notes_by_date(notebook: Notebook, reverse: bool = False) -> list[Note]:
 
 
 def _extract_tags(note: Note) -> list[str]:
-    """Витягує теги (слова що починаються з #) з заголовку та вмісту нотатки."""
-    text = f"{note.title} {note.content}"
-    return [
-        word[1:].lower()
-        for word in text.split()
-        if word.startswith("#") and len(word) > 1
-    ]
+    """Витягує теги з поля tags нотатки."""
+    return [tag.lower() for tag in (note.tags or [])]
