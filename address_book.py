@@ -42,7 +42,8 @@ class Record:
         self.phones = []
         self.email = None
         self.birthday = None
-
+        self.tags = []  # список тегів для цього контакту
+        
     def add_phone(self, phone) -> None:
         """Додає номер телефону до запису."""
         self.phones.append(Phone(phone))
@@ -88,6 +89,22 @@ class Record:
                 return p
         return None
 
+    def add_tag(self, tag) -> None:
+        """Додає тег до запису."""
+        if tag not in self.tags:
+            self.tags.append(tag)
+
+    def edit_tag(self, old_tag, new_tag) -> None:
+        """Редагує існуючий тег."""
+        if old_tag in self.tags:
+            index = self.tags.index(old_tag)
+            self.tags[index] = new_tag
+
+    def remove_tag(self, tag) -> None:
+        """Видаляє тег з запису."""
+        if tag in self.tags:
+            self.tags.remove(tag)
+            
     def add_birthday(self, value) -> None:
         """Додає або оновлює день народження контакту."""
         self.birthday = Birthday(value)
@@ -114,6 +131,9 @@ class Record:
             lines.append(f"  🎂 Birthday: {self.birthday}")
         else:
             lines.append("  🎂 Birthday: —")
+
+        if self.tags: lines.append(f" 🏷️ Tags: {', '.join(self.tags)}")
+        else: lines.append(" 🏷️ Tags: —")
 
         return "\n".join(lines)
 
@@ -361,6 +381,34 @@ def search_contact(args, book: AddressBook) -> str: # NEW
         email_str = record.email.value if hasattr(record, 'email') and record.email else "—"
         lines.append(f"{record.name.value}: телефони: {phones_str}, email: {email_str}")
     return "\n".join(lines)
+
+@input_error
+def add_tag_to_contact(args, book: AddressBook):
+    name, tag, *_ = args
+    record = book.find(name)
+    if record is None:
+        raise KeyError
+    record.add_tag(tag)
+    return f"Тег '{tag}' додано для контакту {name}."
+
+@input_error
+def edit_tag_of_contact(args, book: AddressBook):
+    name, old_tag, new_tag, *_ = args
+    record = book.find(name)
+    if record is None:
+        raise KeyError
+    record.edit_tag(old_tag, new_tag)
+    return f"Тег '{old_tag}' замінено на '{new_tag}' для контакту {name}."
+
+@input_error
+def remove_tag_from_contact(args, book: AddressBook):
+    name, tag, *_ = args
+    record = book.find(name)
+    if record is None:
+        raise KeyError
+    record.remove_tag(tag)
+    return f"Тег '{tag}' видалено з контакту {name}."
+    
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -380,6 +428,9 @@ def main() -> None:
         "search": search_contact,  # <-- додано
         "add-email": add_email,
         "show": show_contact,  # ← новая команда
+        "add-tag": add_tag_to_contact,
+        "edit-tag": edit_tag_of_contact,
+        "remove-tag": remove_tag_from_contact,
     }
     note_commands = {
         "note-add": note_add,
