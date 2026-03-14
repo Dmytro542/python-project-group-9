@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: assistant-bot-team9
+Version: 1.0.0
+Summary: Бот-помічник TEAM-9 — адресна книга та нотатки
+Requires-Python: >=3.8
+Requires-Dist: prompt_toolkit>=3.0
+Requires-Dist: prettytable>=3.0
+Requires-Dist: colorama>=0.4.6
