@@ -43,6 +43,8 @@ def note_add(args: list[str], notebook: Notebook) -> str:
 @input_error
 def note_search(args: list[str], notebook: Notebook) -> str:
     query = " ".join(args).strip() if args else ""
+    if query.startswith("#"):
+        return note_search_tag(args, notebook)
     notes = notebook.search(query)
     if not notes:
         return "Нотаток не знайдено."
