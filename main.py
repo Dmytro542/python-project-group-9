@@ -83,7 +83,7 @@ def _show_notes_help() -> None:
 
 
 def _banner():
-    title = "Бот-помічник SMART TEAM-9"
+    title = "Бот-помічник TEAM-9"
     width = len(title) + 6
     print(f"\n{MENU_TITLE}╔{'═' * width}╗{RESET}")
     print(f"{MENU_TITLE}║{RESET}   {header(title)}   {MENU_TITLE}║{RESET}")
