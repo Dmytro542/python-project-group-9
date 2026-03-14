@@ -4,7 +4,7 @@
 
 ## Вимоги
 
-- Python 3.10+
+- Python 3.11+
 
 ## Запуск
 
@@ -20,7 +20,7 @@ run.bat
 
 **Або напряму:**
 ```bash
-python3 address_book.py
+python3.11 address_book.py
 ```
 
 ## Команди
