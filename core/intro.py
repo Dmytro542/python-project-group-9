@@ -69,7 +69,7 @@ def play_intro():
 
         clear_screen()
 
-        title = "GROUP-9"
+        title = "SMART TEAM"
         subtitle = "Бот помічник"
         title_row = rows // 2 - 1
         title_col = (cols - len(title)) // 2
