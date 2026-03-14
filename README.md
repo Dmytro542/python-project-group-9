@@ -87,4 +87,9 @@ note-search #молоко
 
 ## Автори
 
-Команда групи 9
+group-9 team
+
+Mykhailo Kachanov
+Oksana Khomenko
+Oleksandr Sluch
+Dmytro Rubakhin
