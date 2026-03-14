@@ -1,1 +1,2 @@
+colorama
 prompt_toolkit>=3.0
