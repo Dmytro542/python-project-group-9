@@ -81,3 +81,89 @@ def mode_header(title: str) -> str:
     """Заголовок при вході в режим."""
     line = f"{TABLE_BORDER}{'─' * 40}{RESET}"
     return f"\n{line}\n  {HEADER}{title}{RESET}\n  {MUTED}help — команди  |  back — меню{RESET}\n{line}"
+
+
+import unicodedata
+
+
+def _display_width(text: str) -> int:
+    """Обчислює візуальну ширину рядка в терміналі (wide chars = 2)."""
+    width = 0
+    for ch in text:
+        cat = unicodedata.category(ch)
+        if cat == "Mn":  # combining marks — zero width
+            continue
+        eaw = unicodedata.east_asian_width(ch)
+        if eaw in ("W", "F"):
+            width += 2
+        elif cat == "So":  # symbols like emoji
+            width += 2
+        else:
+            width += 1
+    return width
+
+
+def _pad(text: str, target_width: int) -> str:
+    """Доповнює рядок пробілами до потрібної візуальної ширини."""
+    current = _display_width(text)
+    return text + " " * max(0, target_width - current)
+
+
+def render_table(columns: list[str], rows: list[list[str]], title: str = "") -> str:
+    """Малює таблицю з рамкою та кольоровими заголовками.
+
+    columns: список назв колонок
+    rows: список рядків (кожен — список значень)
+    title: опційний заголовок над таблицею
+    """
+    if not rows:
+        return ""
+
+    # Обчислюємо ширину кожної колонки (візуальну)
+    col_widths = [_display_width(c) for c in columns]
+    for row in rows:
+        for i, cell in enumerate(row):
+            if i < len(col_widths):
+                col_widths[i] = max(col_widths[i], _display_width(cell))
+
+    lines = []
+
+    if title:
+        lines.append(f"  {HEADER}{title}{RESET}")
+
+    # Верхня рамка
+    top = f"{TABLE_BORDER}┌"
+    for i, w in enumerate(col_widths):
+        top += "─" * (w + 2)
+        top += "┬" if i < len(col_widths) - 1 else "┐"
+    lines.append(f"{top}{RESET}")
+
+    # Заголовки колонок
+    hdr = f"{TABLE_BORDER}│"
+    for i, col in enumerate(columns):
+        hdr += f" {TABLE_HEADER}{_pad(col, col_widths[i])}{RESET} {TABLE_BORDER}│"
+    lines.append(f"{hdr}{RESET}")
+
+    # Розділювач
+    sep = f"{TABLE_BORDER}├"
+    for i, w in enumerate(col_widths):
+        sep += "─" * (w + 2)
+        sep += "┼" if i < len(col_widths) - 1 else "┤"
+    lines.append(f"{sep}{RESET}")
+
+    # Рядки даних
+    for row in rows:
+        line = f"{TABLE_BORDER}│{RESET}"
+        for i, w in enumerate(col_widths):
+            cell = row[i] if i < len(row) else ""
+            line += f" {_pad(cell, w)} {TABLE_BORDER}│{RESET}"
+        lines.append(line)
+
+    # Нижня рамка
+    bot = f"{TABLE_BORDER}└"
+    for i, w in enumerate(col_widths):
+        bot += "─" * (w + 2)
+        bot += "┴" if i < len(col_widths) - 1 else "┘"
+    lines.append(f"{bot}{RESET}")
+
+    return "\n".join(lines)

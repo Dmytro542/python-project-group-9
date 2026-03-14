@@ -7,6 +7,12 @@ from prompt_toolkit.formatted_text import ANSI
 
 
 COMMAND_ARGS_BY_MODE: dict[str, dict[str, list[str]]] = {
+    "main": {
+        "contacts": [],
+        "notes": [],
+        "exit": [],
+        "close": [],
+    },
     "contacts": {
         "add": ["<ім'я>", "<телефон>"],
         "edit": ["<ім'я>", "<старий_телефон>", "<новий_телефон>"],
@@ -97,6 +103,7 @@ _session: PromptSession | None = None
 _session_initialized = False
 
 _MODE_PROMPTS = {
+    "main": "  Оберіть: ",
     "contacts": "\033[93;1m[Контакти]\033[0m >>> ",
     "notes": "\033[93;1m[Нотатки]\033[0m >>> ",
 }

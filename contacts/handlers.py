@@ -1,7 +1,7 @@
 from contacts.models import Record, AddressBook
 from contacts.birthdays import get_upcoming_birthdays
 from core.utils import input_error
-from core.theme import success, error, info, header, TABLE_BORDER, RESET
+from core.theme import success, error, info, header, render_table
 
 
 @input_error
@@ -39,12 +39,24 @@ def show_phone(args, book: AddressBook) -> str:
     return info(f"{name}: {', '.join(p.value for p in record.phones)}")
 
 
+def _record_to_row(record: Record) -> list[str]:
+    """Конвертує контакт у рядок таблиці."""
+    phones = ", ".join(p.value for p in record.phones) if record.phones else "—"
+    email = record.email.value if record.email else "—"
+    birthday = str(record.birthday) if record.birthday else "—"
+    tags = ", ".join(record.tags) if record.tags else "—"
+    return [record.name.value, phones, email, birthday, tags]
+
+
+CONTACT_COLUMNS = ["👤 Ім'я", "☎️ Телефони", "📧 Email", "🎂 День народж.", "🏷️ Теги"]
+
+
 @input_error
 def show_all(args, book: AddressBook) -> str:
     if not book.data:
         return info("Адресна книга порожня.")
-    sep = f"\n{TABLE_BORDER}{'─' * 30}{RESET}\n"
-    return sep.join(str(record) for record in book.data.values())
+    rows = [_record_to_row(r) for r in book.data.values()]
+    return render_table(CONTACT_COLUMNS, rows, f"Всього контактів: {len(rows)}")
 
 
 @input_error
@@ -84,7 +96,8 @@ def show_contact(args, book: AddressBook) -> str:
     record = book.find(name)
     if record is None:
         raise KeyError
-    return str(record)
+    rows = [_record_to_row(record)]
+    return render_table(CONTACT_COLUMNS, rows)
 
 
 @input_error
@@ -93,10 +106,8 @@ def birthdays(args, book: AddressBook) -> str:
     upcoming = get_upcoming_birthdays(book, days)
     if not upcoming:
         return info(f"На протязі {days} днів, дні народження ніхто не святкує.")
-    lines = [header("Найближчі дні народження:")]
-    for item in upcoming:
-        lines.append(f"  🎂 {item['name']}: {item['congratulation_date']}")
-    return "\n".join(lines)
+    rows = [[item["name"], item["congratulation_date"]] for item in upcoming]
+    return render_table(["Ім'я", "Дата привітання"], rows, f"Дні народження ({days} днів)")
 
 
 @input_error
@@ -105,12 +116,8 @@ def search_contact(args, book: AddressBook) -> str:
     results = book.search(query)
     if not results:
         return info("Контактів не знайдено.")
-    lines = [header(f"Знайдено {len(results)}:")]
-    for record in results:
-        phones_str = ", ".join(p.value for p in record.phones) if record.phones else "—"
-        email_str = record.email.value if record.email else "—"
-        lines.append(f"  {record.name.value}: тел. {phones_str}, email: {email_str}")
-    return "\n".join(lines)
+    rows = [_record_to_row(r) for r in results]
+    return render_table(CONTACT_COLUMNS, rows, f"Знайдено: {len(results)}")
 
 
 @input_error

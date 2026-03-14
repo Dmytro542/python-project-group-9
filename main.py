@@ -78,7 +78,10 @@ def main() -> None:
             if mode == "main":
                 _show_main_menu()
                 try:
-                    choice = input("  Оберіть: ").strip().lower()
+                    if prompt_input:
+                        choice = prompt_input("main").strip().lower()
+                    else:
+                        choice = input("  Оберіть: ").strip().lower()
                 except (KeyboardInterrupt, EOFError):
                     _save_all(book, notebook)
                     print(info("\nДо зустрічі!"))
