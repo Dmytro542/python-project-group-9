@@ -8,17 +8,6 @@
 
 ## Запуск
 
-**Mac / Linux:**
-```bash
-./run.sh
-```
-
-**Windows:**
-```bash
-run.bat
-```
-
-**Або напряму:**
 ```bash
 python3.11 address_book.py
 ```
@@ -85,9 +74,7 @@ note-search #молоко
 │   ├── handlers.py          # Обробники команд нотаток
 │   ├── search.py            # Пошук і сортування нотаток
 │   └── storage.py           # Збереження/завантаження нотаток
-├── prompt_helper.py         # Підказки команд
-├── run.sh                   # Скрипт запуску для Mac/Linux
-└── run.bat                  # Скрипт запуску для Windows
+└── prompt_helper.py         # Підказки команд
 ```
 
 ## Збереження даних
