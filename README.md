@@ -89,7 +89,7 @@ note-search #молоко
 
 group-9 team
 
-Mykhailo Kachanov
-Oksana Khomenko
-Oleksandr Sluch
-Dmytro Rubakhin
+Mykhailo Kachanov  
+Oksana Khomenko  
+Oleksandr Sluch  
+Dmytro Rubakhin  
