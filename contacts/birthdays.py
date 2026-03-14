@@ -1,14 +1,21 @@
+import calendar
 from datetime import date, timedelta
-from .Utils import birthday_in_year
 
-def get_upcoming_birthdays(self, upcoming_days: int) -> list[dict[str, str]]:
+
+def birthday_in_year(birth: date, year: int) -> date:
+    if birth.month == 2 and birth.day == 29 and not calendar.isleap(year):
+        return date(year, 2, 28)
+    return birth.replace(year=year)
+
+
+def get_upcoming_birthdays(book, upcoming_days: int) -> list[dict[str, str]]:
     """
     Повертає список контактів, яких потрібно привітати за задану кількість днів.
     Вихідні (субота, неділя) переносяться на понеділок.
     """
     today = date.today()
     result = []
-    for record in self.data.values():
+    for record in book.data.values():
         if record.birthday is None:
             continue
         birth = record.birthday.value

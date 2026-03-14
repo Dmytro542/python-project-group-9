@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 
@@ -8,6 +8,7 @@ class Note:
     title: str
     content: str
     created_at: datetime | None = None
+    tags: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.created_at is None:

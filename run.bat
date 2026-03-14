@@ -11,6 +11,6 @@ call .venv\Scripts\activate.bat
 pip install -r requirements.txt --quiet 2>nul
 
 cls
-python address_book.py
+python main.py
 
 pause

@@ -12,4 +12,4 @@ source .venv/bin/activate
 
 pip install -r requirements.txt --quiet
 
-python address_book.py
+python main.py
