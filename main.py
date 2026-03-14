@@ -9,6 +9,8 @@ from contacts.storage import load_data, save_data as save_contacts
 from contacts import handlers as contact_handlers
 from notebook.storage import load_data as load_notebook, save_data as save_notebook
 from notebook.handlers import note_add, note_search, note_delete, note_edit, note_sort
+from core.help_text import HELP, _format_help_row, show_help
+from core.theme import HEADER, MUTED
 
 
 _ERROR_KEYWORDS = ("не знайдено", "невірн", "помилка", "неправильн", "не існує", "відсутн")
@@ -60,8 +62,28 @@ def _register_commands():
     return {**commands, **note_commands}, commands, note_commands
 
 
+def _show_contacts_help() -> None:
+    contact_cmds = [c for c in HELP if not c.startswith("note-") and c != "help"]
+    lines = [
+        f"\n{HEADER}Команди адресної книги:{RESET}",
+        *(_format_help_row(c, HELP[c][0], HELP[c][1]) for c in contact_cmds if c in HELP),
+        f"  {INFO}{'back':<45}{RESET} — {MUTED}повернутись у головне меню{RESET}",
+    ]
+    print("\n".join(lines))
+
+
+def _show_notes_help() -> None:
+    note_cmds = ["note-add", "note-search", "note-delete", "note-edit", "note-sort"]
+    lines = [
+        f"\n{HEADER}Команди нотаток:{RESET}",
+        *(_format_help_row(c, HELP[c][0], HELP[c][1]) for c in note_cmds if c in HELP),
+        f"  {INFO}{'back':<45}{RESET} — {MUTED}повернутись у головне меню{RESET}",
+    ]
+    print("\n".join(lines))
+
+
 def _banner():
-    title = "Бот-помічник SMART TEAM"
+    title = "Бот-помічник SMART TEAM-9"
     width = len(title) + 6
     print(f"\n{MENU_TITLE}╔{'═' * width}╗{RESET}")
     print(f"{MENU_TITLE}║{RESET}   {header(title)}   {MENU_TITLE}║{RESET}")
@@ -98,6 +120,7 @@ def main() -> None:
             print(f"\n{SUCCESS}[OK] До зустрічi!{RESET}")
             break
         if choice == "1":
+            _show_contacts_help()
             while True:
                 user_input = read_line_with_completion("Адресна книга > ", contact_names)
                 command, args = parse_input(user_input)
@@ -115,6 +138,7 @@ def main() -> None:
                         print(warning(f"Невірна команда «{command}». Введіть help — список команд, back — у меню."))
             continue
         if choice == "2":
+            _show_notes_help()
             while True:
                 user_input = read_line_with_completion("Нотатки > ", note_names)
                 command, args = parse_input(user_input)
