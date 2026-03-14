@@ -1,5 +1,12 @@
 from colorama import init, Fore, Style
 
+import sys
+import os
+
+# Ensure UTF-8 output on Windows
+if os.name == "nt":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 init(autoreset=True)
 
 # Color constants
@@ -48,3 +55,29 @@ def header(msg: str) -> str:
 def clear_screen():
     import os
     os.system("cls" if os.name == "nt" else "clear")
+
+
+def render_menu(title: str, options: list[tuple[str, str]]) -> str:
+    """Малює красиве меню з рамкою."""
+    width = 40
+    border = TABLE_BORDER
+    lines = [
+        f"{border}╔{'═' * width}╗{RESET}",
+        f"{border}║{MENU_TITLE}{title:^{width}}{RESET}{border}║{RESET}",
+        f"{border}╠{'═' * width}╣{RESET}",
+        f"{border}║{' ' * width}║{RESET}",
+    ]
+    for key, label in options:
+        inner = f"   {MENU_KEY}[{key}]{RESET}  {MENU_OPTION}{label}{RESET}"
+        # padding: key + label visible length
+        pad = width - 5 - len(key) - 2 - len(label)
+        lines.append(f"{border}║{RESET}{inner}{' ' * pad}{border}║{RESET}")
+    lines.append(f"{border}║{' ' * width}║{RESET}")
+    lines.append(f"{border}╚{'═' * width}╝{RESET}")
+    return "\n".join(lines)
+
+
+def mode_header(title: str) -> str:
+    """Заголовок при вході в режим."""
+    line = f"{TABLE_BORDER}{'─' * 40}{RESET}"
+    return f"\n{line}\n  {HEADER}{title}{RESET}\n  {MUTED}help — команди  |  back — меню{RESET}\n{line}"
