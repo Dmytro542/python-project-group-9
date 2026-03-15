@@ -23,6 +23,14 @@ def _render_notes(notes: list[Note], title: str = "") -> str:
 
 
 @input_error
+def note_all(args: list[str], notebook: Notebook) -> str:
+    notes = list(notebook.search(""))
+    if not notes:
+        return info("Нотаток немає.")
+    return _render_notes(notes, f"Всього нотаток: {len(notes)}")
+
+
+@input_error
 def note_add(args: list[str], notebook: Notebook) -> str:
     if len(args) < 2:
         raise IndexError

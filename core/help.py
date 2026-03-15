@@ -19,7 +19,8 @@ CONTACTS_HELP: dict[str, tuple[str, str]] = {
 
 NOTES_HELP: dict[str, tuple[str, str]] = {
     "add": ("add <заголовок> <текст>", "Додати нотатку."),
-    "search": ("search [запит]", "Пошук нотаток (без запиту — всі)."),
+    "all": ("all", "Показати всі нотатки."),
+    "search": ("search [запит]", "Пошук нотаток за текстом."),
     "search-tag": ("search-tag <#тег>", "Пошук за тегом."),
     "sort-tag": ("sort-tag", "Сортувати за тегами."),
     "sort-date": ("sort-date [desc]", "Сортувати за датою."),

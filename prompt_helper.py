@@ -33,6 +33,7 @@ COMMAND_ARGS_BY_MODE: dict[str, dict[str, list[str]]] = {
     },
     "notes": {
         "add": ["<заголовок>", "<текст>"],
+        "all": [],
         "search": ["[запит]"],
         "search-tag": ["<#тег>"],
         "sort-tag": [],

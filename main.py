@@ -7,7 +7,7 @@ from contacts.handlers import (
 )
 from notebook.storage import load_data as load_notebook, save_data as save_notebook
 from notebook.handlers import (
-    note_add, note_search, note_delete, note_edit,
+    note_add, note_all, note_search, note_delete, note_edit,
     note_search_tag, note_sort_by_tag, note_sort_by_date,
 )
 from core.utils import parse_input
@@ -33,6 +33,7 @@ CONTACTS_COMMANDS = {
 
 NOTES_COMMANDS = {
     "add": note_add,
+    "all": note_all,
     "search": note_search,
     "search-tag": note_search_tag,
     "sort-tag": note_sort_by_tag,
