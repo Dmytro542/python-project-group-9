@@ -11,7 +11,6 @@ COMMAND_ARGS_BY_MODE: dict[str, dict[str, list[str]]] = {
         "contacts": [],
         "notes": [],
         "exit": [],
-        "close": [],
     },
     "contacts": {
         "add": ["<ім'я>", "<телефон>"],

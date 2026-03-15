@@ -94,7 +94,7 @@ def main() -> None:
                 elif choice in ("2", "notes"):
                     mode = "notes"
                     print(mode_header("Нотатки"))
-                elif choice in ("exit", "close"):
+                elif choice == "exit":
                     _save_all(book, notebook)
                     print(info("До зустрічі!"))
                     break
@@ -117,7 +117,7 @@ def main() -> None:
             if not command:
                 continue
 
-            if command in ("exit", "close"):
+            if command == "exit":
                 _save_all(book, notebook)
                 print(info("До зустрічі!"))
                 break

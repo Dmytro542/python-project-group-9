@@ -57,6 +57,6 @@ def show_help(mode: str, args: list[str]) -> str:
     lines.append(f"  {TABLE_BORDER}{'─' * 38}{RESET}")
     lines.append(_format_row("help [команда]", "Ця довідка."))
     lines.append(_format_row("back", "Повернутись в меню."))
-    lines.append(_format_row("exit", "Вихід з програми."))
+    lines.append(_format_row("exit", "Вийти з програми."))
 
     return "\n".join(lines)
