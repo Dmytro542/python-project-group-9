@@ -3,13 +3,13 @@ from colorama import init, Fore, Style
 import sys
 import os
 
-# Ensure UTF-8 output on Windows
+# Забезпечити UTF-8 вивід на Windows
 if os.name == "nt":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 init(autoreset=True)
 
-# Color constants
+# Кольорові константи
 HEADER = Fore.MAGENTA + Style.BRIGHT
 SUCCESS = Fore.GREEN + Style.BRIGHT
 ERROR = Fore.RED + Style.BRIGHT
@@ -69,7 +69,7 @@ def render_menu(title: str, options: list[tuple[str, str]]) -> str:
     ]
     for key, label in options:
         inner = f"   {MENU_KEY}[{key}]{RESET}  {MENU_OPTION}{label}{RESET}"
-        # padding: key + label visible length
+        # відступ: видима довжина ключа + мітки
         pad = width - 5 - len(key) - 2 - len(label)
         lines.append(f"{border}║{RESET}{inner}{' ' * pad}{border}║{RESET}")
     lines.append(f"{border}║{' ' * width}║{RESET}")
@@ -91,12 +91,12 @@ def _display_width(text: str) -> int:
     width = 0
     for ch in text:
         cat = unicodedata.category(ch)
-        if cat == "Mn":  # combining marks — zero width
+        if cat == "Mn":  # комбіновані знаки — нульова ширина
             continue
         eaw = unicodedata.east_asian_width(ch)
         if eaw in ("W", "F"):
             width += 2
-        elif cat == "So":  # symbols like emoji
+        elif cat == "So":  # символи, наприклад емодзі
             width += 2
         else:
             width += 1

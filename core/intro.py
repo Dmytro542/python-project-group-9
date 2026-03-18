@@ -5,7 +5,7 @@ import random
 
 
 def _kbhit():
-    """Check if a key has been pressed (non-blocking)."""
+    """Перевіряє чи натиснуто клавішу (неблокуюче)."""
     if os.name == "nt":
         import msvcrt
         return msvcrt.kbhit()
@@ -15,7 +15,7 @@ def _kbhit():
 
 
 def _read_key():
-    """Read a single keypress."""
+    """Зчитує одне натискання клавіші."""
     if os.name == "nt":
         import msvcrt
         return msvcrt.getch()
@@ -24,10 +24,10 @@ def _read_key():
 
 
 def _maximize_terminal():
-    """Maximize terminal window via multiple methods."""
+    """Розгортає вікно терміналу кількома методами."""
     if os.name == "nt":
         try:
-            # Method 1: Win32 API maximize
+            # Метод 1: Win32 API розгортання
             import ctypes
             kernel32 = ctypes.windll.kernel32
             user32 = ctypes.windll.user32
@@ -38,20 +38,20 @@ def _maximize_terminal():
         except Exception:
             pass
         try:
-            # Method 2: mode con to max buffer
+            # Метод 2: mode con для макс. буфера
             size = os.get_terminal_size()
             os.system(f"mode con: cols={size.columns} lines={size.lines} >nul 2>&1")
         except Exception:
             pass
     else:
-        # xterm fullscreen escape
+        # xterm повноекранний escape
         sys.stdout.write("\033[9;1t")
         sys.stdout.flush()
         time.sleep(0.15)
 
 
 def play_intro():
-    """Matrix rain animation with SMART TEAM / NEOVERSITY waterfall."""
+    """Анімація Matrix rain з водоспадом NEOVERSITY."""
     try:
         _maximize_terminal()
         time.sleep(0.1)
@@ -75,11 +75,11 @@ def play_intro():
         title_col = (cols - len(title)) // 2
         sub_row = title_row + 1
         sub_col = (cols - len(subtitle)) // 2
-        hint = "Press any key to continue..."
+        hint = "Натисніть будь-яку клавішу..."
         hint_row = sub_row + 3
         hint_col = (cols - len(hint)) // 2
 
-        # Protected zone around the title text
+        # Захищена зона навколо тексту заголовка
         protected_top = title_row - 1
         protected_bottom = hint_row + 1
         protected_left = min(title_col, sub_col, hint_col) - 2
@@ -89,9 +89,9 @@ def play_intro():
             hint_col + len(hint),
         ) + 2
 
-        neo_word = "YTISREVOEN"  # NEOVERSITY reversed — reads bottom to top
+        neo_word = "YTISREVOEN"  # NEOVERSITY задом наперед — читається знизу вгору
 
-        # Build columns — 25% random chars, 75% NEOVERSITY drops
+        # Побудова колонок — 25% випадкові символи, 75% краплі NEOVERSITY
         chars = "01" + "アイウエオカキクケコサシスセソ" + "╋╊╉╈┿┽"
         all_cols = list(range(cols))
         random.shuffle(all_cols)
@@ -109,7 +109,7 @@ def play_intro():
                 "neo_offset": random.randint(0, len(neo_word) - 1) if is_neo else 0,
             })
 
-        # Hide cursor
+        # Приховати курсор
         sys.stdout.write("\033[?25l")
         sys.stdout.flush()
 
@@ -131,7 +131,7 @@ def play_intro():
                 tail_start = head - col["trail"]
                 is_neo = col["neo"]
 
-                # Head character (brightest)
+                # Головний символ (найяскравіший)
                 if 0 <= head < rows and not in_protected(head, c_idx):
                     if is_neo:
                         ch = neo_word[(head + col["neo_offset"]) % len(neo_word)]
@@ -139,7 +139,7 @@ def play_intro():
                         ch = random.choice(chars)
                     output.append(f"\033[{head + 1};{c_idx + 1}H{MATRIX_BRIGHT}{ch}")
 
-                # Body (normal green)
+                # Тіло (звичайний зелений)
                 if 0 <= head - 1 < rows and not in_protected(head - 1, c_idx):
                     if is_neo:
                         ch = neo_word[(head - 1 + col["neo_offset"]) % len(neo_word)]
@@ -147,7 +147,7 @@ def play_intro():
                         ch = random.choice(chars)
                     output.append(f"\033[{head};{c_idx + 1}H{MATRIX_GREEN}{ch}")
 
-                # Tail (dim)
+                # Хвіст (тьмяний)
                 if 0 <= tail_start < rows and not in_protected(tail_start, c_idx):
                     if is_neo:
                         ch = neo_word[(tail_start + col["neo_offset"]) % len(neo_word)]
@@ -155,13 +155,13 @@ def play_intro():
                         ch = random.choice(chars)
                     output.append(f"\033[{tail_start + 1};{c_idx + 1}H{MATRIX_DIM}{ch}")
 
-                # Erase behind tail
+                # Стерти за хвостом
                 if 0 <= tail_start - 1 < rows and not in_protected(tail_start - 1, c_idx):
                     output.append(f"\033[{tail_start};{c_idx + 1}H {RESET}")
 
                 col["row"] += col["speed"]
 
-                # Reset column when off screen
+                # Скинути колонку коли за межами екрану
                 if tail_start > rows:
                     col["active"] = random.random() < 0.4
                     col["row"] = random.randint(-8, 0)
@@ -170,14 +170,14 @@ def play_intro():
                     if is_neo:
                         col["neo_offset"] = random.randint(0, len(neo_word) - 1)
 
-            # Title with glow effect
+            # Заголовок з ефектом світіння
             glow = "\033[1;97m" if int(time.time() * 4) % 2 == 0 else MATRIX_BRIGHT
             output.append(f"\033[{title_row + 1};{title_col + 1}H{glow}{title}{RESET}")
 
-            # Subtitle
+            # Підзаголовок
             output.append(f"\033[{sub_row + 1};{sub_col + 1}H{MATRIX_GREEN}{subtitle}{RESET}")
 
-            # Blinking hint
+            # Блимаюча підказка
             if int(time.time() * 2) % 2 == 0:
                 output.append(f"\033[{hint_row + 1};{hint_col + 1}H{MATRIX_DIM}{hint}{RESET}")
             else:
@@ -191,7 +191,7 @@ def play_intro():
                 _read_key()
                 break
 
-        # Show cursor & clean up
+        # Показати курсор та очистити
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
         clear_screen()

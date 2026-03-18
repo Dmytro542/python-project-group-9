@@ -10,6 +10,7 @@ COMMAND_ARGS_BY_MODE: dict[str, dict[str, list[str]]] = {
     "main": {
         "contacts": [],
         "notes": [],
+        "about": [],
         "exit": [],
     },
     "contacts": {

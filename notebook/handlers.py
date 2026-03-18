@@ -33,7 +33,7 @@ def note_all(args: list[str], notebook: Notebook) -> str:
 @input_error
 def note_add(args: list[str], notebook: Notebook) -> str:
     if len(args) < 2:
-        raise IndexError
+        raise ValueError("Вкажіть заголовок та текст. Формат: add <заголовок> <текст>")
     title, *rest = args
     content = " ".join(rest).strip() if rest else ""
     note = notebook.add(title, content)
@@ -55,7 +55,7 @@ def note_search(args: list[str], notebook: Notebook) -> str:
 @input_error
 def note_delete(args: list[str], notebook: Notebook) -> str:
     if not args:
-        raise IndexError
+        raise ValueError("Вкажіть ID нотатки. Формат: delete <id>")
     raw_id = args[0]
     try:
         note_id = int(raw_id)
@@ -69,7 +69,7 @@ def note_delete(args: list[str], notebook: Notebook) -> str:
 @input_error
 def note_edit(args: list[str], notebook: Notebook) -> str:
     if len(args) < 2:
-        raise IndexError
+        raise ValueError("Вкажіть ID та новий текст. Формат: edit <id> <новий текст>")
     raw_id, *rest = args
     try:
         note_id = int(raw_id)
@@ -87,7 +87,7 @@ def note_edit(args: list[str], notebook: Notebook) -> str:
 @input_error
 def note_search_tag(args: list[str], notebook: Notebook) -> str:
     if not args:
-        raise IndexError
+        raise ValueError("Вкажіть тег для пошуку. Формат: search-tag <#тег>")
     tag = args[0].lstrip("#")
     notes = search_notes_by_tag(notebook, tag)
     if not notes:

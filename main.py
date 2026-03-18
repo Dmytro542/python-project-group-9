@@ -52,6 +52,7 @@ def _show_main_menu():
     print(render_menu("Бот-помічник TEAM-9", [
         ("1", "Контакти"),
         ("2", "Нотатки"),
+        ("about", "Про програму"),
         ("exit", "Вихід"),
     ]))
 
@@ -94,13 +95,16 @@ def main() -> None:
                 elif choice in ("2", "notes"):
                     mode = "notes"
                     print(mode_header("Нотатки"))
+                elif choice == "about":
+                    from core.about import show_about
+                    show_about()
                 elif choice == "exit":
                     _save_all(book, notebook)
                     print(info("До зустрічі!"))
                     break
                 continue
 
-            # --- Mode: contacts or notes ---
+            # --- Режим: контакти або нотатки ---
             try:
                 if prompt_input:
                     user_input = prompt_input(mode)

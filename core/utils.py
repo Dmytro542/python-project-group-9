@@ -8,11 +8,12 @@ def input_error(func):
         try:
             return func(*args, **kwargs)
         except KeyError:
-            return error("Контакт не знайдено.")
+            return error("Контакт не знайдено. Введіть help для довідки.")
         except ValueError as e:
-            return error(str(e)) if str(e) else error("Невірний формат даних.")
+            msg = str(e) if str(e) else "Невірний формат даних."
+            return error(f"{msg} Введіть help для довідки.")
         except IndexError:
-            return warning("Вкажіть усі аргументи для команди.")
+            return warning("Недостатньо аргументів. Введіть help для довідки.")
 
     return inner
 

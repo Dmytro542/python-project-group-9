@@ -6,6 +6,8 @@ from core.theme import success, error, info, header, render_table
 
 @input_error
 def add_contact(args, book: AddressBook) -> str:
+    if len(args) < 2:
+        raise ValueError("Вкажіть ім'я та телефон. Формат: add <ім'я> <телефон>")
     name, phone, *_ = args
     record = book.find(name)
     message = "Контакт оновлено."
@@ -20,6 +22,8 @@ def add_contact(args, book: AddressBook) -> str:
 
 @input_error
 def change_contact(args, book: AddressBook) -> str:
+    if len(args) < 3:
+        raise ValueError("Вкажіть ім'я, старий та новий телефони. Формат: edit <ім'я> <старий> <новий>")
     name, old_phone, new_phone, *_ = args
     record = book.find(name)
     if record is None:
@@ -30,6 +34,8 @@ def change_contact(args, book: AddressBook) -> str:
 
 @input_error
 def show_phone(args, book: AddressBook) -> str:
+    if not args:
+        raise ValueError("Вкажіть ім'я контакту. Формат: phone <ім'я>")
     name, *_ = args
     record = book.find(name)
     if record is None:
@@ -61,6 +67,8 @@ def show_all(args, book: AddressBook) -> str:
 
 @input_error
 def add_birthday(args, book: AddressBook) -> str:
+    if len(args) < 2:
+        raise ValueError("Вкажіть ім'я та дату. Формат: birthday <ім'я> <DD.MM.YYYY>")
     name, birthday_str, *_ = args
     record = book.find(name)
     if record is None:
@@ -71,6 +79,8 @@ def add_birthday(args, book: AddressBook) -> str:
 
 @input_error
 def add_email(args, book: AddressBook):
+    if len(args) < 2:
+        raise ValueError("Вкажіть ім'я та email. Формат: email <ім'я> <email>")
     name, email, *_ = args
     record = book.find(name)
     if record is None:
@@ -81,6 +91,8 @@ def add_email(args, book: AddressBook):
 
 @input_error
 def show_birthday(args, book: AddressBook) -> str:
+    if not args:
+        raise ValueError("Вкажіть ім'я контакту. Формат: show-bd <ім'я>")
     name, *_ = args
     record = book.find(name)
     if record is None:
@@ -92,6 +104,8 @@ def show_birthday(args, book: AddressBook) -> str:
 
 @input_error
 def show_contact(args, book: AddressBook) -> str:
+    if not args:
+        raise ValueError("Вкажіть ім'я контакту. Формат: show <ім'я>")
     name, *_ = args
     record = book.find(name)
     if record is None:
@@ -112,6 +126,8 @@ def birthdays(args, book: AddressBook) -> str:
 
 @input_error
 def search_contact(args, book: AddressBook) -> str:
+    if not args:
+        raise ValueError("Вкажіть запит для пошуку. Формат: search <запит>")
     query, *_ = args
     results = book.search(query)
     if not results:
@@ -122,6 +138,8 @@ def search_contact(args, book: AddressBook) -> str:
 
 @input_error
 def add_tag_to_contact(args, book: AddressBook):
+    if len(args) < 2:
+        raise ValueError("Вкажіть ім'я та тег. Формат: tag <ім'я> <тег>")
     name, tag, *_ = args
     record = book.find(name)
     if record is None:
@@ -132,6 +150,8 @@ def add_tag_to_contact(args, book: AddressBook):
 
 @input_error
 def edit_tag_of_contact(args, book: AddressBook):
+    if len(args) < 3:
+        raise ValueError("Вкажіть ім'я, старий та новий тег. Формат: edit-tag <ім'я> <старий> <новий>")
     name, old_tag, new_tag, *_ = args
     record = book.find(name)
     if record is None:
@@ -142,6 +162,8 @@ def edit_tag_of_contact(args, book: AddressBook):
 
 @input_error
 def remove_tag_from_contact(args, book: AddressBook):
+    if len(args) < 2:
+        raise ValueError("Вкажіть ім'я та тег. Формат: del-tag <ім'я> <тег>")
     name, tag, *_ = args
     record = book.find(name)
     if record is None:

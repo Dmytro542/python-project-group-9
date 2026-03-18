@@ -2,7 +2,7 @@ from .base_field import Field
 
 
 class Phone(Field):
-    """Поле для хранения номера телефона. Валидация: 10 цифр."""
+    """Поле для зберігання номера телефону. Валідація: 10 цифр."""
 
     def __init__(self, value):
         if not self._is_valid(value):

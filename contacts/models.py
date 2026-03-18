@@ -85,24 +85,26 @@ class Record:
         lines.append(f"👤 {self.name.value}")
 
         if self.phones:
-            lines.append("  ☎️ Phones:")
+            lines.append("  ☎️ Телефони:")
             for phone in self.phones:
                 lines.append(f"     • {phone.value}")
         else:
-            lines.append("  ☎️фдд Phones: —")
+            lines.append("  ☎️ Телефони: —")
 
         if self.email:
-            lines.append(f"  📧 Email: {self.email.value}")
+            lines.append(f"  📧 Пошта: {self.email.value}")
         else:
-            lines.append("  📧 Email: —")
+            lines.append("  📧 Пошта: —")
 
         if self.birthday:
-            lines.append(f"  🎂 Birthday: {self.birthday}")
+            lines.append(f"  🎂 День народження: {self.birthday}")
         else:
-            lines.append("  🎂 Birthday: —")
+            lines.append("  🎂 День народження: —")
 
-        if self.tags: lines.append(f" 🏷️ Tags: {', '.join(self.tags)}")
-        else: lines.append(" 🏷️ Tags: —")
+        if self.tags:
+            lines.append(f"  🏷️ Теги: {', '.join(self.tags)}")
+        else:
+            lines.append("  🏷️ Теги: —")
 
         return "\n".join(lines)
 

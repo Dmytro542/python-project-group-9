@@ -1,12 +1,51 @@
 [
   {
-    "name": "Vasya",
+    "name": "Olena",
     "phones": [
-      "1234567890",
-      "0935000154"
+      "0671234567",
+      "0931112233"
     ],
-    "email": null,
-    "birthday": null,
-    "tags": []
+    "email": "olena.shevchenko@gmail.com",
+    "birthday": "25.03.2026",
+    "tags": [
+      "родина",
+      "робота"
+    ]
+  },
+  {
+    "name": "Andriy",
+    "phones": [
+      "0509876543"
+    ],
+    "email": "a.kovalenko@ukr.net",
+    "birthday": "12.07.1995",
+    "tags": [
+      "друзі"
+    ]
+  },
+  {
+    "name": "Maria",
+    "phones": [
+      "0661234567",
+      "0731112233"
+    ],
+    "email": "maria.bond@outlook.com",
+    "birthday": "03.01.1988",
+    "tags": [
+      "робота",
+      "університет"
+    ]
+  },
+  {
+    "name": "Dmitro",
+    "phones": [
+      "0955554433"
+    ],
+    "email": "d.lysenko@gmail.com",
+    "birthday": "29.02.2000",
+    "tags": [
+      "друзі",
+      "спорт"
+    ]
   }
 ]
