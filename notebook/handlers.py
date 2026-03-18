@@ -111,7 +111,7 @@ def note_sort_by_tag(args: list[str], notebook: Notebook) -> str:
 
 @input_error
 def note_sort_by_date(args: list[str], notebook: Notebook) -> str:
-    reverse = args and args[0].lower() in ("desc", "зворотній")
+    reverse = bool(args) and args[0].lower() in ("desc", "зворотній")
     notes = sort_notes_by_date(notebook, reverse=reverse)
     if not notes:
         return info("Нотаток немає.")
