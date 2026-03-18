@@ -36,7 +36,7 @@ def _render_about_box():
 
     info_items = [
         ("Версія:", "1.0"),
-        ("Команда:", "TEAM-9"),
+        ("Команда:", "SMART TEAM"),
         ("Університет:", "Neoversity"),
     ]
 

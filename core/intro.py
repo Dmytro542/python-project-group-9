@@ -69,8 +69,8 @@ def play_intro():
 
         clear_screen()
 
-        title = "TEAM-9"
-        subtitle = "Бот-помічник"
+        title = "SMART TEAM"
+        subtitle = "Smart Contact Assistant"
         title_row = rows // 2 - 1
         title_col = (cols - len(title)) // 2
         sub_row = title_row + 1

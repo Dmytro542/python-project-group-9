@@ -49,7 +49,7 @@ def _save_all(book, notebook):
 
 
 def _show_main_menu():
-    print(render_menu("Бот-помічник TEAM-9", [
+    print(render_menu("Smart Contact Assistant SMART TEAM", [
         ("1", "Контакти"),
         ("2", "Нотатки"),
         ("about", "Про програму"),
