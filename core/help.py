@@ -18,7 +18,7 @@ CONTACTS_HELP: dict[str, tuple[str, str]] = {
 }
 
 NOTES_HELP: dict[str, tuple[str, str]] = {
-    "add": ("add <заголовок> <текст>", "Додати нотатку."),
+    "add": ("add <заголовок> <текст> [#тег1 #тег2]", "Додати нотатку з тегами."),
     "all": ("all", "Показати всі нотатки."),
     "search": ("search [запит]", "Пошук нотаток за текстом."),
     "search-tag": ("search-tag <#тег>", "Пошук за тегом."),
@@ -26,6 +26,8 @@ NOTES_HELP: dict[str, tuple[str, str]] = {
     "sort-date": ("sort-date [desc]", "Сортувати за датою."),
     "delete": ("delete <id>", "Видалити нотатку."),
     "edit": ("edit <id> <новий текст>", "Редагувати нотатку."),
+    "add-tag": ("add-tag <id> <#тег>", "Додати тег до нотатки."),
+    "del-tag": ("del-tag <id> <#тег>", "Видалити тег з нотатки."),
 }
 
 

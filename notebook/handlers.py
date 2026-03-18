@@ -33,10 +33,14 @@ def note_all(args: list[str], notebook: Notebook) -> str:
 @input_error
 def note_add(args: list[str], notebook: Notebook) -> str:
     if len(args) < 2:
-        raise ValueError("Вкажіть заголовок та текст. Формат: add <заголовок> <текст>")
-    title, *rest = args
-    content = " ".join(rest).strip() if rest else ""
-    note = notebook.add(title, content)
+        raise ValueError("Вкажіть заголовок та текст. Формат: add <заголовок> <текст> [#тег1 #тег2]")
+    title = args[0]
+    tags = [a.lstrip("#").lower() for a in args[1:] if a.startswith("#")]
+    text_parts = [a for a in args[1:] if not a.startswith("#")]
+    content = " ".join(text_parts).strip()
+    if not content:
+        raise ValueError("Вкажіть текст нотатки.")
+    note = notebook.add(title, content, tags=tags)
     return success(f"Нотатку додано (id={note.id}).")
 
 
@@ -111,3 +115,39 @@ def note_sort_by_date(args: list[str], notebook: Notebook) -> str:
         return info("Нотаток немає.")
     order = "нові → старі" if reverse else "старі → нові"
     return _render_notes(notes, f"Сортовано за датою ({order})")
+
+
+@input_error
+def note_add_tag(args: list[str], notebook: Notebook) -> str:
+    if len(args) < 2:
+        raise ValueError("Вкажіть ID та тег. Формат: add-tag <id> <#тег>")
+    raw_id = args[0]
+    try:
+        note_id = int(raw_id)
+    except ValueError:
+        raise ValueError("ID має бути числом.")
+    tag = args[1].lstrip("#").lower()
+    if not tag:
+        raise ValueError("Вкажіть тег.")
+    note = notebook.add_tag(note_id, tag)
+    if note is None:
+        raise ValueError("Нотатку не знайдено.")
+    return success(f"Тег #{tag} додано до нотатки {note_id}.")
+
+
+@input_error
+def note_del_tag(args: list[str], notebook: Notebook) -> str:
+    if len(args) < 2:
+        raise ValueError("Вкажіть ID та тег. Формат: del-tag <id> <#тег>")
+    raw_id = args[0]
+    try:
+        note_id = int(raw_id)
+    except ValueError:
+        raise ValueError("ID має бути числом.")
+    tag = args[1].lstrip("#").lower()
+    if not tag:
+        raise ValueError("Вкажіть тег.")
+    result = notebook.remove_tag(note_id, tag)
+    if result is None:
+        raise ValueError("Нотатку не знайдено або тег відсутній.")
+    return success(f"Тег #{tag} видалено з нотатки {note_id}.")

@@ -32,7 +32,7 @@ COMMAND_ARGS_BY_MODE: dict[str, dict[str, list[str]]] = {
         "exit": [],
     },
     "notes": {
-        "add": ["<заголовок>", "<текст>"],
+        "add": ["<заголовок>", "<текст>", "[#тег1 #тег2]"],
         "all": [],
         "search": ["[запит]"],
         "search-tag": ["<#тег>"],
@@ -40,6 +40,8 @@ COMMAND_ARGS_BY_MODE: dict[str, dict[str, list[str]]] = {
         "sort-date": ["[desc]"],
         "delete": ["<id>"],
         "edit": ["<id>", "<новий текст>"],
+        "add-tag": ["<id>", "<#тег>"],
+        "del-tag": ["<id>", "<#тег>"],
         "help": ["[команда]"],
         "back": [],
         "exit": [],

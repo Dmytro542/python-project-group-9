@@ -9,6 +9,7 @@ from notebook.storage import load_data as load_notebook, save_data as save_noteb
 from notebook.handlers import (
     note_add, note_all, note_search, note_delete, note_edit,
     note_search_tag, note_sort_by_tag, note_sort_by_date,
+    note_add_tag, note_del_tag,
 )
 from core.utils import parse_input
 from core.help import show_help
@@ -40,7 +41,12 @@ NOTES_COMMANDS = {
     "sort-date": note_sort_by_date,
     "delete": note_delete,
     "edit": note_edit,
+    "add-tag": note_add_tag,
+    "del-tag": note_del_tag,
 }
+
+CONTACTS_MUTATING = {"add", "edit", "birthday", "email", "tag", "edit-tag", "del-tag"}
+NOTES_MUTATING = {"add", "delete", "edit", "add-tag", "del-tag"}
 
 
 def _save_all(book, notebook):
@@ -138,12 +144,16 @@ def main() -> None:
             if mode == "contacts":
                 if command in CONTACTS_COMMANDS:
                     print(CONTACTS_COMMANDS[command](args, book))
+                    if command in CONTACTS_MUTATING:
+                        save_contacts(book)
                 else:
                     print(info(f"Невідома команда «{command}». Введіть help."))
 
             elif mode == "notes":
                 if command in NOTES_COMMANDS:
                     print(NOTES_COMMANDS[command](args, notebook))
+                    if command in NOTES_MUTATING:
+                        save_notebook(notebook)
                 else:
                     print(info(f"Невідома команда «{command}». Введіть help."))
 
