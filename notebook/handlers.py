@@ -8,18 +8,20 @@ from core.theme import success, error, info, header, render_table
 NOTE_COLUMNS = ["ID", "Заголовок", "Зміст", "Теги", "Створено"]
 
 
+NOTE_MAX_WIDTHS = [4, 15, 40, 20, 16]
+
+
 def _note_to_row(note: Note) -> list[str]:
     """Конвертує нотатку у рядок таблиці."""
     tags = ", ".join(getattr(note, "tags", []) or []) or "—"
     created = note.created_at.strftime("%d.%m.%Y %H:%M") if note.created_at else "—"
-    content = note.content if len(note.content) <= 40 else note.content[:37] + "..."
-    return [str(note.id), note.title, content, tags, created]
+    return [str(note.id), note.title, note.content, tags, created]
 
 
 def _render_notes(notes: list[Note], title: str = "") -> str:
     """Відображає список нотаток таблицею."""
     rows = [_note_to_row(n) for n in notes]
-    return render_table(NOTE_COLUMNS, rows, title)
+    return render_table(NOTE_COLUMNS, rows, title, max_widths=NOTE_MAX_WIDTHS)
 
 
 @input_error

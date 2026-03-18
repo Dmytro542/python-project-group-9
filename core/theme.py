@@ -109,12 +109,34 @@ def _pad(text: str, target_width: int) -> str:
     return text + " " * max(0, target_width - current)
 
 
-def render_table(columns: list[str], rows: list[list[str]], title: str = "") -> str:
+def _wrap_text(text: str, width: int) -> list[str]:
+    """Розбиває текст на рядки по ширині (по словах)."""
+    if _display_width(text) <= width:
+        return [text]
+    words = text.split()
+    result_lines: list[str] = []
+    current = ""
+    for word in words:
+        if not current:
+            current = word
+        elif _display_width(current + " " + word) <= width:
+            current += " " + word
+        else:
+            result_lines.append(current)
+            current = word
+    if current:
+        result_lines.append(current)
+    return result_lines or [""]
+
+
+def render_table(columns: list[str], rows: list[list[str]], title: str = "",
+                 max_widths: list[int] | None = None) -> str:
     """Малює таблицю з рамкою та кольоровими заголовками.
 
     columns: список назв колонок
     rows: список рядків (кожен — список значень)
     title: опційний заголовок над таблицею
+    max_widths: опційні максимальні ширини колонок (0 = без обмеження)
     """
     if not rows:
         return ""
@@ -125,6 +147,12 @@ def render_table(columns: list[str], rows: list[list[str]], title: str = "") -> 
         for i, cell in enumerate(row):
             if i < len(col_widths):
                 col_widths[i] = max(col_widths[i], _display_width(cell))
+
+    # Застосовуємо обмеження ширини
+    if max_widths:
+        for i, mw in enumerate(max_widths):
+            if i < len(col_widths) and mw > 0:
+                col_widths[i] = min(col_widths[i], mw)
 
     lines = []
 
@@ -151,13 +179,23 @@ def render_table(columns: list[str], rows: list[list[str]], title: str = "") -> 
         sep += "┼" if i < len(col_widths) - 1 else "┤"
     lines.append(f"{sep}{RESET}")
 
-    # Рядки даних
+    # Рядки даних (з переносом тексту)
     for row in rows:
-        line = f"{TABLE_BORDER}│{RESET}"
+        wrapped: list[list[str]] = []
         for i, w in enumerate(col_widths):
             cell = row[i] if i < len(row) else ""
-            line += f" {_pad(cell, w)} {TABLE_BORDER}│{RESET}"
-        lines.append(line)
+            if max_widths and i < len(max_widths) and max_widths[i] > 0:
+                wrapped.append(_wrap_text(cell, w))
+            else:
+                wrapped.append([cell])
+        num_lines = max(len(w) for w in wrapped)
+        for ln in range(num_lines):
+            line = f"{TABLE_BORDER}│{RESET}"
+            for i, w in enumerate(col_widths):
+                cell_lines = wrapped[i]
+                text = cell_lines[ln] if ln < len(cell_lines) else ""
+                line += f" {_pad(text, w)} {TABLE_BORDER}│{RESET}"
+            lines.append(line)
 
     # Нижня рамка
     bot = f"{TABLE_BORDER}└"
