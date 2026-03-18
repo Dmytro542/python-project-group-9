@@ -78,11 +78,17 @@ def _read_key():
     else:
         ch = sys.stdin.read(1)
         if ch == '\x1b':
-            ch2 = sys.stdin.read(1) if _kbhit() else ''
-            if ch2 == '[':
-                ch3 = sys.stdin.read(1) if _kbhit() else ''
-                if ch3 == 'A':
-                    return "UP"
+            # Чекаємо трохи на решту escape-послідовності (стрілки)
+            import select
+            ready, _, _ = select.select([sys.stdin], [], [], 0.05)
+            if ready:
+                ch2 = sys.stdin.read(1)
+                if ch2 == '[':
+                    ready2, _, _ = select.select([sys.stdin], [], [], 0.05)
+                    if ready2:
+                        ch3 = sys.stdin.read(1)
+                        if ch3 == 'A':
+                            return "UP"
             return "ESC"
         elif ch == ' ':
             return "SPACE"
@@ -145,6 +151,11 @@ def play_game(top_offset=0):
     # Ігрова зона: від top_offset до rows
     game_rows = rows - top_offset
     if cols < 40 or game_rows < 10:
+        print("\n  Збільшіть вікно терміналу для запуску гри.")
+        try:
+            input("  Натисніть Enter...")
+        except (KeyboardInterrupt, EOFError):
+            pass
         return
 
     # Налаштування гри відносно ігрової зони
@@ -193,10 +204,10 @@ def play_game(top_offset=0):
             # Обробка вводу
             while _kbhit():
                 key = _read_key()
-                if key == "UP" and not is_jumping:
+                if key in ("UP", "SPACE") and not is_jumping:
                     is_jumping = True
                     jump_velocity = -2.5
-                elif key in ("SPACE", "ESC", "Q"):
+                elif key in ("ESC", "Q"):
                     _restore_terminal(old_settings)
                     return
 

@@ -57,7 +57,7 @@ def _render_about_box():
 
     lines.append(f"{border}║{' ' * width}║{RESET}")
 
-    hint = "↑ стрибок | Space/ESC -> меню"
+    hint = "↑/Space стрибок | ESC/Q -> меню"
     hint_text = f" {MUTED}{hint}{RESET}"
     lines.append(_box_line(border, width, hint_text, 1 + len(hint)))
 
